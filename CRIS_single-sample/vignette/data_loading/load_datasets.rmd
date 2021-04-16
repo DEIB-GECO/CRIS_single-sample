@@ -1,0 +1,87 @@
+---
+title: "Loading original/filtered datasets"
+output: html_notebook
+---
+
+# Purpose of the vignette
+
+Loading of expression data from TCGA source datasets and PDX batches. 
+
+# Setup
+
+In order to load the data, the *here* library is used to access the path with respect to the working directory of the project (CRIS_single-sample folder, which contains the .Rproj file).
+
+```{r setup}
+library(here)
+source(here('src','load_libraries.r'))
+source(here('src','utils','source_utils.r'))
+source(here('src','loader_writer','load_data.r'))
+```
+
+# TCGA\_HG19 dataset
+
+The original data can be loaded as follows (19,949 genes, 450 samples; RSEM normalization):
+
+```{r load_hg19}
+load_candiolo_hg19()
+```
+
+# TCGA\_GRCh38 dataset
+
+The original data can be loaded as follows (58,387 genes, 698 samples; raw counts, FPKM, FPKM_UP normalizations):
+
+```{r load_original}
+load_gmql_grch38(original = TRUE)
+```
+
+The pre-processed data (with NTP features aligned to the GRCh38 reference used in this dataset) can be loaded as follows (24,397 genes, 620 samples; CPM, raw counts, FPKM, FPKM_UQ normalizations):
+
+```{r load_filtered}
+load_gmql_grch38(filtered = TRUE)
+```
+
+The pre-processed data (with NTP features aligned to the GRCh38 reference used in PDX batches and with only the genes in common with the merged PDX batches) can be loaded as follows (15,084 genes, 620 samples; CPM, raw counts, FPKM, FPKM_UP normalizations):
+
+```{r load_filtered_uniformed}
+load_gmql_grch38(filtered = TRUE, uniformed = TRUE)
+```
+
+The metadata and the clinical/biological annotations of the TCGA GRCH38 dataset can be loaded with:
+
+```{r load_meta_and_annotations}
+load_gmql_grch38(metadata = TRUE)
+```
+
+# PDX\_GRCh38 dataset
+**NB**: We now describe how to load PDX data (batches from 1 to 6 and their merged version and annotations). Since these data are proprietary, they cannot be loaded in the repository and thus the following code will not work as the data must be requested separately. Once that they have been obtained, they can be loaded in **PDX** sub-folder of *data/source_data* in order to make the code work.
+
+The original batches can be loaded individually with:
+
+```{r load_original_pdx}
+load_pdx(original = TRUE, batches = c(1,2,3))
+```
+
+The filtered batches can be loaded individually with:
+
+```{r load_filtered_pdx}
+load_pdx(filtered = TRUE, batches = 1:6)
+```
+
+The merged pre-processed batches can be loaded with:
+
+```{r load_merged_pdx}
+load_pdx(merged = TRUE)
+```
+
+To load the version with only the genes belonging also to TCGA\_GRCh38 use:
+
+```{r load_merged_pdx_uniformed}
+load_pdx(merged = TRUE, uniformed = TRUE)
+```
+
+The metadata and the clinical/biological annotations of the PDX\_GRCh38 dataset can be loaded with:
+
+```{r load_meta_and_annotations_PDX}
+load_pdx(metadata = TRUE)
+```
+
