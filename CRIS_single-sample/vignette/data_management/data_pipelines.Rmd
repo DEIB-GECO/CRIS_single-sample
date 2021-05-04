@@ -1,0 +1,141 @@
+---
+title: "Data pipelines"
+output: html_notebook
+---
+
+# Setup
+
+In order to load the data, the *here* library is used to access the path with respect to the working directory of the project (CRIS_single-sample folder, which contains the .Rproj file). 
+
+```{r setup}
+library(here)
+source(here('src','load_libraries.r'))
+source(here('src','utils','source_utils.r'))
+source(here('src','loader_writer','load_data.r'))
+source(here('src','data_management','source_data_management.r'))
+source(here('src','classifiers','source_classifiers.r'))
+source(here('src','pipelines','source_pipelines.r'))
+# Data loading
+load_gmql_grch38(filtered = TRUE, uniformed = TRUE)
+
+# Reference loading
+NTP_ref <- load_file(path_loader$get_path("NTP_REF_TCGA"))
+```
+
+# CRISData class
+
+In order to replicate the NTP classification, a *CRISData* object without no reference is required.
+To load this type of data, it is sufficient to:
+
+```{r}
+cris_data_no_ref <- cris_no_ref_data_pipeline(GMQL_GRCH38_FILTERED$cpm, log2_tr = FALSE)
+```
+
+In order to apply TSP, a CRISData object with not-null reference is required. To load this type of data, it is sufficient to:
+
+```{r}
+cris_data <- cris_data_pipeline(expset = GMQL_GRCH38_FILTERED$cpm, 
+                                ref    = NTP_ref$result,
+                                conf   = 'conf', 
+                                log2_tr = FALSE)
+```
+
+The *expset* parameter requires the data ExpressionSet; the *ref* parameter requires the output result of an NTP classification. The *conf* parameter can be either *conf*, *not_conf*, or *all*, to load respectively confident, not confident or all samples. A sample is considered confident if, for the assigned class, *BH.FDR < 0.2*. Finally, *log2_tr* parameter specifies if the expression must be transformed as *log2(1 + expression)*. 
+For NTP and TSP, *log2tr* has been set to FALSE.
+
+# SLData class
+
+The SLData class is used to store data on which single-label classification will be computed.
+
+```{r}
+sldata <- sl_data_pipeline(expset = GMQL_GRCH38_FILTERED$cpm,
+                           ref    = NTP_ref$result,
+                           conf   = 'conf',
+                           train_samples = c(),
+                           log2_tr = TRUE)
+```
+
+The *expset*,*ref*,*conf*,*log2_tr* parameters are analogue to the ones specified for *CRISData* object (actually, *sldata* object uses a *CRISData* within its instantiation). The *train_samples* parameter is used to specify whether the dataset must be split or not.
+When *train_samples* parameter is equal to *c()*, all samples are put into testing. When *train_samples* is a not-empty character vector (vector of aliquot IDs), the specified samples are put into training dataset:
+
+```{r}
+sldata <- sl_data_pipeline(expset = GMQL_GRCH38_FILTERED$cpm,
+                           ref    = NTP_ref$result,
+                           conf   = 'conf',
+                           train_samples = load_training_samples(),
+                           log2_tr = TRUE)
+```
+
+In order to access train and test data, it is sufficient to:
+
+```{r}
+head(sldata$train_)
+head(sldata$test_)
+```
+
+In order to access the reference (predicted class, NTP correlation scores and FDR for all classes), it is sufficient to:
+
+```{r}
+head(sldata$train_ref)
+head(sldata$test_ref)
+```
+
+Each sample is referenced through its aliquot-id. The predicted class is represented in *predicted.label2* attribute; the NTP correlation scores (computed as 1 - distances) are represented in *CRIS-A, CRIS-B, ... CRIS-E* attributes; the BH.FDR values are represented in *BH.FDR.CRIS.A, ... , BH.FDR.CRIS.E*. 
+*perc* and *seed* attributes are inherited from generic class *Data*, but not used. The entire dataset and the entire reference can be examined through:
+
+```{r}
+head(sldata$data)
+head(sldata$ref)
+```
+
+# MLData class
+
+The MLData class is used to store data on which multi-label classification will be computed. The parameters are the same of *sl_data_pipeline*; in addition, however, the *dist_thr* threshold is necessary to transform the single-label NTP reference into a multi-label NTP reference. This parameter (whose name stands for *distance thresholds*) is a vector of 5 doubles (one threshold for each CRIS class).
+Thresholds can be accessed with:
+
+```{r}
+ntp_thr <- load_file(path_loader$get_path('NTP_THR'))
+```
+
+Thresholds are specific to each dataset (TCGA or PDX). In order to get the thresholds for TCGA, it is sufficient to:
+
+```{r}
+ntp_thr$tcga
+```
+
+Similarly, for PDX:
+
+```{r}
+ntp_thr$pdx
+```
+
+Now that thresholds have been loaded, MLData object can be created:
+
+```{r}
+mldata <- ml_data_pipeline(expset = GMQL_GRCH38_FILTERED$cpm,
+                           ref    = NTP_ref$result,
+                           conf   = 'conf',
+                           dist_thr = ntp_thr$tcga,
+                           train_samples = c(),
+                           log2_tr = TRUE)
+```
+
+As before, to split the data between training and testing:
+
+```{r}
+mldata <- ml_data_pipeline(expset = GMQL_GRCH38_FILTERED$cpm,
+                           ref    = NTP_ref$result,
+                           conf   = 'conf',
+                           dist_thr = ntp_thr$tcga,
+                           train_samples = load_training_samples(),
+                           log2_tr = TRUE)
+```
+
+The entire data (which is an *mldr* object) and the entire reference can be accessed through
+
+```{r}
+head(mldata$data$dataset)
+head(mldata$ref)
+```
+
+# PREPARED TCGA AND PDX DATA

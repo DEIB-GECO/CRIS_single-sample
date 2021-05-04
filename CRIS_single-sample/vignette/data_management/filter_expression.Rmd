@@ -1,0 +1,101 @@
+---
+title: "How to filter data"
+output: html_notebook
+---
+
+# Setup
+
+In order to load the data, the *here* library is used to access the path with respect to the working directory of the project (CRIS_single-sample folder, which contains the .Rproj file). In order to apply the filters, we first need to load some data.
+
+```{r setup}
+library(here)
+source(here('src','load_libraries.r'))
+source(here('src','utils','source_utils.r'))
+source(here('src','loader_writer','load_data.r'))
+source(here('src','data_management','source_data_management.r'))
+
+# Data loading
+load_candiolo_hg19()
+```
+
+# Filter by genes
+
+Genes can be filtered by list (extract only some of the genes) or by expression threshold(for example, extract the genes for which the expression is at least 6 for at least 30\% of the samples). In both cases, we need to instantiate a gene filter:
+
+```{r create_gene_filter}
+gf <- GenesFilter$new()
+genes_selection <- c("A1BG",  "A1CF",  "A2BP1")
+```
+
+The expression matrix can be extracted from the data ExpressionSet as follows:
+
+```{r extract_exp_matr}
+exp_matr <- CANDIOLO_HG19@assayData$exprs
+exp_matr[5:7, 5:7]
+```
+
+The expression matrix contains genes on the rows and samples on the columns. In order to filter genes by a predefined list, it is sufficient to:
+
+```{r gene_filt_by_list}
+data_filt_by_list <- gf$filter_by_list(exp_matr, genes_selection)
+data_filt_by_list
+```
+
+A message is displayed with the genes selected by the filter.
+
+In order to filter the genes by expression, it is sufficient to:
+
+```{r filt_by_threshold}
+data_filt_by_exp <- gf$filter_by_threshold(exp_matr, expr_thr = 6, samples_thr = 0.3)
+```
+
+As before, a message is displayed with the selected number of genes. In both cases, an expression matrix is returned. To build an ExpressionSet with the new matrix it is sufficient to:
+
+```{r build_expset}
+filt_expset <- ExpressionSet(assayData = data_filt_by_exp)
+```
+
+This is quite relevant as data are mostly saved and used as ExpressionSets.
+
+# Filter by samples
+
+The same expression matrix can be filtered also by samples. As before, the filter must be instantiated.
+
+```{r create_samples_filter}
+sf <- SamplesFilter$new()
+samples_selection <- c("TCGA-AF-2693-01A-02R-1736-07", "TCGA-AA-3495-01A-01R-1410-07")
+```
+
+In order to filter the samples, it is sufficient to:
+
+```{r apply_samples_filter}
+sf$filter_by_list(exp_matr, samples_selection)
+```
+
+As for the genes filter, the filter displays an information on the number of samples extracted.
+It is also possible to take all samples but the ones specified:
+
+```{r remove_samples_filter}
+sf$remove_by_list(exp_matr, samples_selection)
+```
+
+# Combining filters
+
+The filters can also be combined:
+
+```{r combine_filters}
+filt_data_combined <- sf$filter_by_list(exp_matr, samples_selection)
+filt_data_combined <- gf$filter_by_list(filt_data_combined, genes_selection)
+```
+
+
+
+
+
+
+
+
+
+
+
+

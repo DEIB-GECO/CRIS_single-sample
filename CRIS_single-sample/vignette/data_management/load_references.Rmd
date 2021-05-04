@@ -1,0 +1,54 @@
+---
+title: "Reference results"
+output: html_notebook
+---
+
+# Setup
+
+In order to load the data, the *here* library is used to access the path with respect to the working directory of the project (CRIS_single-sample folder, which contains the .Rproj file). In order to apply the filters, we first need to load some data.
+
+```{r setup}
+library(here)
+source(here('src','load_libraries.r'))
+source(here('src','utils','source_utils.r'))
+source(here('src','loader_writer','load_data.r'))
+source(here('src','data_management','source_data_management.r'))
+
+# Data loading
+load_gmql_grch38(filtered = TRUE, uniformed = TRUE)
+```
+
+# Published results
+
+Loading of published results for NTP and TSP (TCGA\_HG19 dataset)
+
+```{r}
+load_published_ntp()
+load_published_tsp()
+```
+
+# Training and testing samples
+
+TCGA\_GRCH38 dataset has been splitted into training and testing:
+
+```{r}
+training_samples <- load_training_samples()
+```
+
+```{r}
+testing_samples  <- load_tcga_testing_samples()
+```
+
+# NTP reference result
+
+The reference NTP results contain the data used for the NTP classification (*data*), the result of the classification (*result*) and the number of samples assigned to each class (*summary*).
+
+```{r}
+NTP_ref <- load_file(path_loader$get_path("NTP_REF_TCGA"))
+PDX_ref <- load_file(path_loader$get_path("NTP_REF_PDX"))
+```
+
+
+
+
+

@@ -85,3 +85,8 @@ The metadata and the clinical/biological annotations of the PDX\_GRCh38 dataset 
 load_pdx(metadata = TRUE)
 ```
 
+The LMX samples not used for the biological-driven filter can be loaded with:
+
+```{r load_unused_PDX}
+load_unused_pdx(uniformed = TRUE)
+```
