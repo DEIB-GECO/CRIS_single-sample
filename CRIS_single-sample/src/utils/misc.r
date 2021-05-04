@@ -1,9 +1,10 @@
 # Description -------------------------------------------------------------
 
-# Set of miscellaneous functions that perform small tasks and that can be 
-# used by other scripts.
+# Set of miscellaneous functions that perform small heterogeneous tasks and that 
+# can be used by other scripts.
 
 # VALIDITY ---------------------------------------------------------------
+
 # Validity functions checked
 check_length <- function(object, length_min, length_max){
   
@@ -176,4 +177,26 @@ check_type <- function(object, type, length_min = NULL, length_max = NULL, dim_m
     
   return(type_check)
   
+}
+
+
+#' Check if any undesired value (NA, NaN, NULL, Inf) is present in a dataframe.
+#' @param df    Dataframe to check
+#' 
+#' @return      TRUE if any undersired value is present, FALSE otherwise.
+#'  
+any_uncomplete <- function(df){
+  
+  if (check_type(df,'null'))
+    return(TRUE)
+  
+  data <- unlist(df, recursive = TRUE)
+  
+  check <- lapply(data, function(k){
+    missing   <- any(is.na(k) | k == 'NA')  | any(is.null(k) | k == 'NULL')
+    undefined <- any(is.nan(k) | k == 'NaN') | any(is.infinite(k) | k == 'Inf' | k == '-Inf')
+    return(missing | undefined)
+  }) %>% unlist()
+ 
+  return(any(check))
 }

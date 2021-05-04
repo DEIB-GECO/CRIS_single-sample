@@ -87,7 +87,7 @@ PathLoader <- R6Class("PathLoader",
       #' Checks that the source path has been built correctly
       #' 
       #' @param path path to check
-      #' @param starting the origin of the path
+      #' @param extension the type of extensions (.csv, .gct, .rda, .rds, .xlsx)
       #' @return TRUE or FALSE
       has_extension = function(path, extension = ""){
         
@@ -100,7 +100,7 @@ PathLoader <- R6Class("PathLoader",
         if (any(tolower(extension) == private$.allowed_extensions))
           extension_check <- grepl(extension, path, fixed = TRUE)
         else
-          warning(paste("PathLoader: extension", extension, "not supported."))
+          warning(paste("PathLoader: extension", extension, "not found in the path."))
           
         return(extension_check)
       }
