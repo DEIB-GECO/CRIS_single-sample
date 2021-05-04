@@ -139,3 +139,65 @@ head(mldata$ref)
 ```
 
 # PREPARED TCGA AND PDX DATA
+
+In order to load confident TCGA data splitted into training and testing for single-label classifiers it is sufficient to (with CRIS signature as feature set):
+
+```{r}
+sldata <- load_prepared_tcga_data(confident = 'conf',
+                                  uniformed = TRUE,
+                                  fs_type = 'ntp_only',
+                                  type = 'sl',
+                                  samples_filter = NULL,
+                                  load_training = TRUE)
+```
+
+The *confident* parameter, which be either *conf*, *not_conf*, *all* selects respectively confident, not confident or all data. confident samples are characterized by BH.FDR of the assigned class below 0.02.
+The *uniformed* parameter (either *true* or *false*), tells if the NTP genes must be aligned to the reference used in PDX\_GRCh38 or not (we advise to keep it always to *true*). The *fs_type* parameter allows to specify the feature set. In order to use the original CRIS signature, it should be set to *ntp_only*. If set to *c("bio_driven","lasso")* all the genes surviving to the biological filter and to the lasso step can be obtained. The *type* parameter specifies the type of data: *cris_no_ref* prepares CRISData for NTP replication; *cris* prepares CRISData for TSP replication; *sl* prepares data for single-label classification. *ml* prepares data for multi-label classifier.
+The *samples_filter* parameter can contain vector of aliquot ID to be filtered out by the available data, before possibly splitting in training and testing. By default, it is set to *NULL*.
+The *load_training* parameter can be set to *TRUE* or to *FALSE*. If *TRUE*, data are splitted into training and testing, otherwise they are all put into testing.
+
+For example, to obtain all the confident TCGA data splitted into training and testing for multi-label problem transformation classifiers (with CRIS signature as feature set):
+
+
+```{r}
+mldata <- load_prepared_tcga_data(confident = 'conf',
+                                  uniformed = TRUE,
+                                  fs_type = 'ntp_only',
+                                  type = 'ml',
+                                  samples_filter = NULL,
+                                  load_training = TRUE)
+```
+
+In order to load testing TCGA data for TSP it is sufficient to:
+
+```{r}
+tsp_data <- load_prepared_tcga_data(confident = 'conf',
+                                  uniformed = TRUE,
+                                  fs_type = 'ntp_only',
+                                  type = 'cris',
+                                  samples_filter = load_tcga_testing_samples(),
+                                  load_training = FALSE)
+```
+
+NB: in order to apply TSP, the only usable feature set is *ntp_only*. In order to load PDX confident data for single-label classifiers:
+For PDX, the approach is similar: however, the *load_training* parameter is absent, as the PDX data can be used only as testing.
+
+```{r}
+sldata <- load_prepared_pdx_data(confident = 'conf',
+                                 uniformed = TRUE,
+                                 fs_type = c('bio_driven','lasso'),
+                                 type = 'sl',
+                                 samples_filter = NULL)
+```
+
+# Values for *fs_type*
+
+A table with values for *fs_type* is reported, together with its meaning:
+
+| Value      | Description |
+| ----------- | ----------- |
+| c('ntp_only')      | CRIS signature (564 genes) |
+| c('bio_driven')   | Genes surviving biological driven filter (7100 genes).   |
+| c('bio_driven','lasso')      |  Genes surviving biological driven filter and union of 10 lasso filters (236 genes). |
+| c('bio_driven','ntp_only')   | CRIS signature genes surviving biological driven filter (178 genes). |
+| c('bio_driven','lasso','ntp_only')   | CRIS signature genes surviving biological driven filter and lasso (12 genes).|

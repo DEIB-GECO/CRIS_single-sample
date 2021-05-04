@@ -297,15 +297,15 @@ load_features_grch38 <- function(dataset = 'tcga'){
 # Prepared datasets -------------------------------------------------------
 
 # OK
-.get_feature_manager <- function(uniformed, dataset, fs_type, lasso_type){
+.get_feature_manager <- function(uniformed, dataset, fs_type){
   
   # Feature selection
   if (uniformed | dataset == 'pdx'){
     print_info('Feature Selection (PDX aliases)...')
-    fs <- FeatureManagerPDX$new(fs_type,lasso_type)
+    fs <- FeatureManagerPDX$new(fs_type)
   }else if (!uniformed & dataset == 'tcga'){
     print_info('Feature Selection (TCGA aliases)...')
-    fs <- FeatureManagerTCGA$new(fs_type,lasso_type)
+    fs <- FeatureManagerTCGA$new(fs_type)
   }
   
   return(fs)
@@ -385,7 +385,7 @@ load_features_grch38 <- function(dataset = 'tcga'){
 }
 
 # TODO: CHECK
-load_testing_tcga_tsp <- function(confident,uniformed,fs_type, lasso_type = '', type = 'train'){
+load_testing_tcga_tsp <- function(confident,uniformed,fs_type,  type = 'train'){
   
   # Data loading
   load_gmql_grch38(original = FALSE, filtered = TRUE, uniformed)
@@ -406,7 +406,7 @@ load_testing_tcga_tsp <- function(confident,uniformed,fs_type, lasso_type = '', 
   filt_ref  <- filt_res$ref
 
   # Feature selection
-  fs        <- .get_feature_manager(uniformed, 'tcga', fs_type, lasso_type)
+  fs        <- .get_feature_manager(uniformed, 'tcga', fs_type)
   filt_data <- fs$feature_selection(filt_data, fs_type)
    
   return(.apply_data_pipeline('cris', filt_data, filt_ref, confident, train_samples, bin_thr))
@@ -414,7 +414,7 @@ load_testing_tcga_tsp <- function(confident,uniformed,fs_type, lasso_type = '', 
 }
 
 # TODO: CHECK
-load_prepared_tcga_data <- function(confident, uniformed, fs_type, type = 'sl', lasso_type = '', samples_filter = NULL, load_training = TRUE){
+load_prepared_tcga_data <- function(confident, uniformed, fs_type, type = 'sl',  samples_filter = NULL, load_training = TRUE){
   
   # Data loading
   load_gmql_grch38(original = FALSE, filtered = TRUE, uniformed = uniformed)
@@ -431,7 +431,7 @@ load_prepared_tcga_data <- function(confident, uniformed, fs_type, type = 'sl', 
   filt_ref  <- filt_res$ref
 
   # Feature selection
-  fs        <- .get_feature_manager(uniformed, 'tcga', fs_type, lasso_type)
+  fs        <- .get_feature_manager(uniformed, 'tcga', fs_type)
   filt_data <- fs$feature_selection(filt_data, fs_type)
   
   
@@ -440,7 +440,7 @@ load_prepared_tcga_data <- function(confident, uniformed, fs_type, type = 'sl', 
 }
 
 # TODO: CHECK
-load_prepared_pdx_data <- function(confident, uniformed, fs_type, type = 'sl', lasso_type = '', samples_filter = NULL){
+load_prepared_pdx_data <- function(confident, uniformed, fs_type, type = 'sl', samples_filter = NULL){
   
   # Loading data
   load_unused_pdx(uniformed)
@@ -457,7 +457,7 @@ load_prepared_pdx_data <- function(confident, uniformed, fs_type, type = 'sl', l
   filt_ref  <- filt_res$ref
   
   # Feature selection
-  fs   <- .get_feature_manager(uniformed, 'pdx', fs_type, lasso_type)
+  fs   <- .get_feature_manager(uniformed, 'pdx', fs_type)
   filt_data <- fs$feature_selection(filt_data, fs_type)
   
   return(.apply_data_pipeline(type, filt_data, filt_ref, confident, train_samples, bin_thr))

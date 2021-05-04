@@ -329,7 +329,7 @@ FeatureManagerTCGA <- R6Class(
   lock_class   = TRUE,
   
   private = list(
-    .load_lasso = function(features_type = NULL, type_lasso = ''){
+    .load_lasso = function(features_type = NULL){
       
       lasso <- NULL
       
@@ -343,7 +343,7 @@ FeatureManagerTCGA <- R6Class(
   ),
   
   public = list(
-    initialize = function(lasso_features = NULL, type_lasso = ''){
+    initialize = function(lasso_features = NULL){
       
       # Features remaining after biological feature selection
       bio <- load_file(path_loader$get_path("BIO_DRIVEN_TCGA"))
@@ -352,7 +352,7 @@ FeatureManagerTCGA <- R6Class(
       ntp <- features_grch38
       
       # Init with superclass
-      super$initialize(ntp, bio, private$.load_lasso(lasso_features, type_lasso))
+      super$initialize(ntp, bio, private$.load_lasso(lasso_features))
       
     },
     
@@ -395,7 +395,7 @@ FeatureManagerPDX <- R6Class(
   lock_objects = TRUE,
   lock_class   = TRUE,
    private = list(
-    .load_lasso = function(features_type = NULL, type_lasso = ''){
+    .load_lasso = function(features_type = NULL){
       
       lasso <- NULL
       
@@ -409,16 +409,16 @@ FeatureManagerPDX <- R6Class(
   ),
   
   public = list(
-    initialize = function(lasso_features = NULL, type_lasso = ''){
+    initialize = function(lasso_features = NULL){
       
       # Features remaining after biological feature selection
       bio <- load_file(path_loader$get_path("BIO_DRIVEN_PDX"))
       # NTP features
       load_features_grch38('pdx')
-      ntp <- features_grch38
+      ntp <- features_pdx
       
       # Init with superclass
-      super$initialize(ntp, bio, private$.load_lasso(lasso_features, type_lasso))
+      super$initialize(ntp, bio, private$.load_lasso(lasso_features))
       
     },
     
