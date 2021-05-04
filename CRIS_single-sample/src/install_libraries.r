@@ -13,7 +13,8 @@ libraries <- c("crayon",             # coloured print
                "R6",                 # handle R classes
                "stringr",            # string utilities (string length, substring etc.)
                "tidyverse",          # handle data.frames (filter, group, etc.)
-               "readxl"              # read excel files
+               "readxl",             # read excel files
+               "utiml"               # apply multi-label classification
               )
   
 
