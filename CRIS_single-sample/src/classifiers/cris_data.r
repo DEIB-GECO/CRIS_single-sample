@@ -1,27 +1,8 @@
 
 # Description -------------------------------------------------------------
 
-# Class for replication of CRIS classifiers (NTP and TSP). Contains the data, 
-# the reference and the list of classes. Contains data, the reference and
-# the list of classes. Moreover, it contains train and test data, together
-# with reference splitted in train and test. Among the settings, the
-# percentage of training data is saved, together with the seed used for
-# random stratified split.
-# 
-# Finally, it contains the original scores and the max number of labels
-# allowed (if NULL, no maximum is set).
-
-# Libraries ---------------------------------------------------------------
-
-# Class
-library(R6)
-
-# Expression Set
-library(Biobase)
-
-# Data manipulation and %>% pipe
-library(tidyverse)
-
+# Data class used in the replication of CRIS classifiers (NTP and TSP). 
+# Contains the data and the reference and the list of classes. 
 
 # Class definition --------------------------------------------------------
 CRISData <- R6Class(
@@ -30,7 +11,7 @@ CRISData <- R6Class(
   lock_objects = TRUE,
   lock_class   = TRUE,
   
-  #### Public fields ####
+  #### Private fields ####
   
   private = list(
     
@@ -38,26 +19,35 @@ CRISData <- R6Class(
     .ref  = NULL,
     .classes = NULL,
     
+    #' Checks the type of data is an ExpressionSet with not-emtpy numeric
+    #' assayData field. In case of errors, it stops the execution of the program.
+    #' 
+    #' @param data   The data object to check
     .validate_data = function(data){
       
       if(!check_type(data,'ExpressionSet'))
-        stop('use ExpressionSet data')
+        stop('CRIData: use ExpressionSet data')
       
       if(!check_type(data@assayData$exprs,'matrix',c(1,1)) | !check_type(data@assayData$exprs,'numeric'))
-        stop('Invalid expression matrix')
+        stop('CRISData: Invalid expression matrix')
 
       
     },
     
+    #' Checks the type of reference is data.frame with aliquot id (character), predicted class
+    #' (factor), distance and fdr for all CRIS classes (numeric). Rownames must
+    #' be equal to aliquot IDs. In case of errors, it stops the execution of the program. 
+    #' 
+    #' @param ref   The reference object to check
     .validate_ref = function(ref){
       
       # Check type
       if (!check_type(ref,'data.frame'))
-        stop('use data.frame as reference')
+        stop('CRISData: use data.frame as reference')
       
       # Check samples
       if (!any(all.equal(rownames(ref), ref[,ALIQUOT_LABEL]) == TRUE))
-        stop(paste('reference must have non-null rownames (', ALIQUOT_LABEL, 'column)'))
+        stop(paste('CRISData: reference must have non-null rownames (', ALIQUOT_LABEL, 'column)'))
       
       # Check if columns are missing
       required_columns <- c(ALIQUOT_LABEL,
@@ -66,17 +56,17 @@ CRISData <- R6Class(
                             CLASS_DISTANCE_LABEL)
       
       if (!any(all.equal(sort(required_columns), sort(colnames(ref))) == TRUE))
-        stop(paste(c('All and only required columns:', required_columns), collapse = '\n'))
+        stop(paste(c('CRISData: All and only required columns:', required_columns), collapse = '\n'))
 
       if (!check_type(ref[,ALIQUOT_LABEL],'character'))
-        stop(paste(ALIQUOT_LABEL, 'must be character'))
+        stop(paste('CRISData:', ALIQUOT_LABEL, 'must be character'))
       
       # Check class label column is a factor with CRIS levels
       if (!check_type(ref[,CLASS_LABEL],'factor'))
-        stop(paste(CLASS_LABEL, 'must be a factor'))
+        stop(paste('CRISData:',CLASS_LABEL, 'must be a factor'))
       
       if (!any(all.equal(levels(ref[,CLASS_LABEL]), private$.classes)))
-        stop(paste(CLASS_LABEL, 'must be a factor with', private$.classes, 'levels.'))
+        stop(paste('CRISData:',CLASS_LABEL, 'must be a factor with', private$.classes, 'levels.'))
       
       # Check other columns are numeric
       numeric_columns <- c(CLASS_FDR_LABEL, CLASS_DISTANCE_LABEL)
@@ -85,15 +75,16 @@ CRISData <- R6Class(
       }) %>% unlist()
       
       if (!all(dist_fdr_modes))
-        stop(paste(numeric_columns, 'must be numeric'))
+        stop(paste('CRISData:',numeric_columns, 'must be numeric'))
       
       # Check missing values
       if (any_uncomplete(ref))
-        stop('NA, NULL, NaN or Inf values are not allowed')
+        stop('CRISData:NA, NULL, NaN or Inf values are not allowed')
       
     },
     
     #' Prepare reference by translating NTP class distances into correlations
+    #' (correlation = 1 - distance)
     .prepare_ref = function(){
       
       # Extract class names in from distance columns
@@ -111,6 +102,8 @@ CRISData <- R6Class(
   
   public = list(
     
+    #' Create the CRISData object; it receives an ExpressionSet (data) and possibly
+    #' a reference, obtained by NTP classification (ref). 
     initialize = function(data, ref = NULL){
      
       # Set classes
@@ -130,7 +123,7 @@ CRISData <- R6Class(
         ref_samples  <- sort(rownames(ref))
         
         if (!any(all.equal(data_samples, ref_samples) == TRUE))
-          stop('Not NULL reference with no samples correspondence')
+          stop('CRISData: Not NULL reference with no samples correspondence')
         
         # If reference is valid, assign and prepare it
         private$.ref <- ref
@@ -143,7 +136,7 @@ CRISData <- R6Class(
   ),
   
   #### Active fields ####
-  # Read only access to private fields
+  # Provide read-only access to private fields
   
   active = list(
     
@@ -153,21 +146,21 @@ CRISData <- R6Class(
       if (missing(v))
         private$.data
       else
-        stop('`data` is read-only.')
+        stop('CRISData: `data` is read-only.')
     },
     
     ref     = function(v){
       if (missing(v))
         private$.ref
       else
-        stop('`ref` is read-only.')
+        stop('CRISData: `ref` is read-only.')
     },
     
     classes = function(v){
       if (missing(v))
         private$.classes
       else
-        stop('`classes` is read-only.')
+        stop('CRISData: `classes` is read-only.')
     }
   )
   

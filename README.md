@@ -14,8 +14,8 @@ The installation required is summarized in the next steps:
 5. Restart R and check that path of command is returned with
   
   >  <code>    Sys.which("make") </code>
-  
-6. Clone the repository; in RStudio, open the project with File > Open project and open the CRIS_single-sample folder (it contains the .Rproj file) located in the repository folder.
+
+6. Download the zip file of the repository; in RStudio, open the project with File > Open project and open the CRIS_single-sample folder (it contains the .Rproj file) located in the repository folder.
 
 7. Install the required libraries by running the script in the src folder of the project:
 

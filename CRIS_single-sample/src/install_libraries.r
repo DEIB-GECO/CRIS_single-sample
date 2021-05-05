@@ -4,10 +4,12 @@
 
 # Configuration -----------------------------------------------------------
 
-.INSTALL <- FALSE
+.INSTALL <- TRUE
 
 # Required libraries
-libraries <- c("crayon",             # coloured print
+libraries <- c("caret",              # single-label classification
+               "crayon",             # coloured print 
+               "glmnet",             # generalized linear model for Lasso
                "here",               # handle paths
                "fs",                 # handle paths
                "R6",                 # handle R classes
@@ -26,7 +28,7 @@ if (.INSTALL){
   if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
   
-  # Biobase 
+  # Biobase (ExpressionSet)
   if (!require("Biobase"))
     BiocManager::install("Biobase")
   

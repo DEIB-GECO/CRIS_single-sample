@@ -384,34 +384,6 @@ load_features_grch38 <- function(dataset = 'tcga'){
   return(data)
 }
 
-# TODO: CHECK
-load_testing_tcga_tsp <- function(confident,uniformed,fs_type,  type = 'train'){
-  
-  # Data loading
-  load_gmql_grch38(original = FALSE, filtered = TRUE, uniformed)
-   
-  filt_data     <- GMQL_GRCH38_FILTERED$cpm@assayData$exprs
-  train_samples <- load_training_samples()
-  
-  if (type == 'train')
-    samp_filt <- train_samples
-  else if (type == 'test')
-    samp_filt <- dplyr::setdiff(colnames(filt_data), train_samples)
-  else
-    samp_filt <- NULL
-  
-  # Apply samples filter
-  filt_res  <- .filt_samples_and_ref(samp_filt, filt_data, .get_ref('cris', 'tcga'))
-  filt_data <- ExpressionSet(assayData = filt_res$data)
-  filt_ref  <- filt_res$ref
-
-  # Feature selection
-  fs        <- .get_feature_manager(uniformed, 'tcga', fs_type)
-  filt_data <- fs$feature_selection(filt_data, fs_type)
-   
-  return(.apply_data_pipeline('cris', filt_data, filt_ref, confident, train_samples, bin_thr))
-
-}
 
 # TODO: CHECK
 load_prepared_tcga_data <- function(confident, uniformed, fs_type, type = 'sl',  samples_filter = NULL, load_training = TRUE){

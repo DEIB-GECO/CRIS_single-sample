@@ -4,19 +4,6 @@
 # Class with set of functions for feature selection. All functions receive
 # data as expression set and return data as expression set (filtered).
 
-# Libraries ---------------------------------------------------------------
-
-# Class
-library(R6)
-
-# Expression Set
-library(Biobase)
-
-# Data manipulation and %>% pipe
-library(tidyverse)
-
-# Lasso
-library(glmnet)
 
 # Feature Selection --------------------------------------------------------
 

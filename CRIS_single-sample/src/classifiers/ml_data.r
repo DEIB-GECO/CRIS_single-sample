@@ -1,3 +1,11 @@
+# Description -------------------------------------------------------------
+
+# Class definition for multi-label data. It extends the Data class but includes
+# also the thresholds for assigning multi-label reference (from NTP single-label 
+# to NTP multi-label) and a copy of the original data as data.frame (used for
+# creating mldr object). 
+
+# Class definition --------------------------------------------------------
 
 PercentileMLData <- R6Class(
   
@@ -6,21 +14,26 @@ PercentileMLData <- R6Class(
   lock_objects = TRUE,
   lock_class   = TRUE,
 
+  ##### Private fields #####
+  
   private = list(
     
     .class_thr = NULL,
     .data_as_df = NULL,
     
+    #' Prepare the reference saving a copy of original ntp scores (attributes: ntpCRIS-A, ntpCRIS-B, ...)
+    #' and renaming the scores to be binarized with class name.
     .init_ref = function(){
       
-      # Select aliquot, primary NTP class, ntp scores (to be binarized), ntp fdr
+      # Select aliquot ID, primary NTP class, ntp scores (to be binarized), ntp fdr scores
       private$.ref <- private$.ref %>% 
         select(ALIQUOT_LABEL, CLASS_LABEL, private$.classes, CLASS_FDR_LABEL) %>%
         as.data.frame()
       
-      private$.ref[ ,CLASS_LABEL] <- factor(private$.ref[ ,CLASS_LABEL], levels = private$.classes)
+      private$.ref[ ,CLASS_LABEL] <- 
+        factor(private$.ref[ ,CLASS_LABEL], levels = private$.classes)
       
-      # Save original ntp scores in reference
+      # Save a copy of the original ntp scores in reference
       scores           <- private$.ref[,c(ALIQUOT_LABEL,private$.classes)]
       colnames(scores) <- c(ALIQUOT_LABEL, paste('ntp', private$.classes, sep = ''))
       private$.ref <- full_join(scores, private$.ref, by = ALIQUOT_LABEL)
@@ -29,57 +42,15 @@ PercentileMLData <- R6Class(
       rownames(private$.ref) <- private$.ref[,ALIQUOT_LABEL]
     },
     
-    .add_ranks = function(){
-      
-      classes <- levels(F_CRIS_CLASSES)
-      rank_labels     <- paste('rank', classes, sep = '')
-      w_scores_labels <- paste('weighted', classes, sep = '')
-      
-      # Empty weighted scores
-      w_scores <- matrix(0, nrow = nrow(private$.ref), ncol = length(classes))
-      colnames(w_scores) <- w_scores_labels
-      
-      # Empty ranks
-      ranks <- matrix(0, nrow = nrow(private$.ref), ncol = length(classes))
-      colnames(ranks) <- rank_labels
-      
-      # Add weighted scores and ranks to result
-      private$.ref     <- cbind(private$.ref, as.data.frame(w_scores))
-      private$.ref     <- cbind(private$.ref, as.data.frame(ranks))
-      
- 
-      # Fill the ranks when at least one class is assigned
-      for (k in seq(nrow(private$.ref))){
-        
-        # Get and sort (descending) scores for current sample
-        scores        <- private$.ref[k, paste('ntp',classes, sep = '')] %>% 
-                         unlist() %>% 
-                         as.numeric() %>%
-                         signif(8)
-        
-        # Scores/thresholds 
-        weighted_scores <- scores/private$.class_thr[classes]
-        sorted_w_scores <- sort(unique(weighted_scores), decreasing = TRUE)
-        
-        # Get position (rank) of each score in the sorted list of unique scores
-        ranking <- lapply(X   = seq(length(weighted_scores)), 
-                          FUN = function(k){which(sorted_w_scores == weighted_scores[k])}) 
-        
-        # Assign weighted scores and ranking
-        private$.ref[k,w_scores_labels] <- weighted_scores
-        private$.ref[k,rank_labels]     <- ranking
-        
-      }
-      
-    },
-    
+    #' Binarize the NTP class scores. For each class, in each sample, assign 1
+    #' if fdr < 0.2 and class = CRIS-class OR if fdr < 0.2 and score >= class-threshold
     .prepare_ref = function(){
       
       private$.init_ref()
       
-      # For each class, assign 1
-      # if fdr < 0.2 and class = CRIS-class or 
-      # if fdr < 0.2 and score > class-threshold
+      # For each class, in each sample assign 1
+      # if fdr < 0.2 and class = CRIS-class OR 
+      # if fdr < 0.2 and score >= class-threshold
       for (c in seq(length(private$.classes))) {
         cl <- private$.classes[c]
         
@@ -108,21 +79,28 @@ PercentileMLData <- R6Class(
       # Save as data.frame
       private$.ref <- as.data.frame(private$.ref)
       
-      # Add ranks
-      private$.add_ranks()
     },
     
-    #' Add one-hot encoding to data and create an mldr object
+    
+    #' Prepare data_as_df object with expression data and binarized scores, obtained
+    #' from prepared reference.
+    #' 
+    #' @return set the data and data_as_df fields with mldr object and data.frame
+    #' object representing data and binarized multi-label target, respectively.
     .prepare_data = function(){
       
        # Expression matrix (samples x genes)
        expr   <- as.data.frame(t(private$.data@assayData$exprs))
 
-       # Join with reference to get binary vector of classes
-       expr   <- expr %>% rownames_to_column(ALIQUOT_LABEL) %>% as.data.frame()
-       private$.data_as_df <- full_join(expr, private$.ref[ ,c(ALIQUOT_LABEL, levels(F_CRIS_CLASSES))], by = ALIQUOT_LABEL)
+       # Join with reference to add binarized scores of each class
+       expr   <- expr %>% 
+         rownames_to_column(ALIQUOT_LABEL) %>% 
+         as.data.frame()
+       
+       private$.data_as_df <- 
+         full_join(expr, private$.ref[ ,c(ALIQUOT_LABEL, CRIS_CLASSES)], by = ALIQUOT_LABEL)
 
-       # Rename rows
+       # Rename rows with aliquot IDs
        private$.data_as_df <- private$.data_as_df %>% column_to_rownames(ALIQUOT_LABEL)
        
        # Get indices of columns with labels
@@ -140,14 +118,23 @@ PercentileMLData <- R6Class(
   
   public = list(
     
-    # max_labels is ignored here
+    #' Constructor
+    #' 
+    #' @param cris_data A CRISData object from which data and reference are extracted
+    #' @param classes   The class names character vector
+    #' @param class_thr The distances used to obtain multi-label NTP reference
+    #' from NTP single-label reference
     initialize = function(cris_data, classes, class_thr){
      
-      private$.class_thr <- class_thr 
+      # Check input
+      if (names(class_thr) != CRIS_CLASSES | mode(class_thr) != 'numeric')
+        stop('PercentileMLData: `class_thr` must contain a nuemric threshold for each class')
       
       if (all(class(cris_data) != 'CRISData'))
-        stop('`cris_data` must be a CRISData object')
+        stop('PercentileMLData: `cris_data` must be a CRISData object')
       
+      # Assign input
+      private$.class_thr <- class_thr 
       super$initialize(cris_data$data, cris_data$ref, classes)
       
       # Adapt ML ref (NTP correlations >> binary class assignment)
@@ -158,44 +145,18 @@ PercentileMLData <- R6Class(
 
     },
     
-    stratified_split  = function(train_perc, seed){
-      
-      super$stratified_split(train_perc, seed)
-      if (train_perc == 0){
-        private$.train_ <- NULL
-        private$.test_  <- private$.data
-        
-        # Split reference
-        train_samples <- c()
-        test_samples  <- rownames(private$.test_$dataset)
-      }else if (train_perc == 1){
-        private$.train_ <- private$.data
-        private$.test_  <- NULL
-        
-        # Split reference
-        train_samples <- rownames(private$.train_$dataset)
-        test_samples  <- c()
-      }else{
-        
-        # Split data
-        perc <- c(train = train_perc, test = 1 - train_perc)
-        ds   <- create_holdout_partition(private$.data, perc, method = 'stratified')
-      
-        # Set train and test data
-        private$.train_ <- ds$train
-        private$.test_  <- ds$test
-        
-        # Split reference
-        train_samples <- rownames(ds$train$dataset)
-        test_samples  <- rownames(ds$test$dataset)
-      
-      }
-      
-      private$.split_reference(train_samples, test_samples)
-      
-    },
-    
+   
+    #' Split the data and reference putting into training the provided samples.
+    #' The remainder is put into testing.
+    #' 
+    #' @param train_samples A character vector with the training samples, provided
+    #' through aliquot IDs.
+    #' 
+    #' @return Set the train_ and test_ fields, together with corresponding
+    #' train_ref and test_ref of the current object.
     split_by_list  = function(train_samples){
+      
+      # If no train sample, put all data into testing
       if (length(train_samples) == 0){
         print_info('all testing')
         private$.train_ <- NULL
@@ -208,44 +169,54 @@ PercentileMLData <- R6Class(
         if (class(train_samples) != 'character')
           stop('`train_samples` must be a character vector.')
       
-        # Split data
+        # Samples belonging to required train set
         train_indices <- which(rownames(private$.data_as_df) %in% train_samples)
         
+        # At least one of required samples is present in the dataset
         if (length(train_indices) > 0){
-          # Get indices of columns with labels
+          
+          # Get indices of columns named by class labels (NTP scores)
           lab_cols <- which(colnames(private$.data_as_df) %in% private$.classes)
       
+          # Create MLDR objects for train and test data
           private$.train_ <- private$.data_as_df[train_indices, ] %>% 
             mldr_from_dataframe(labelIndices = lab_cols, name = "train_")
           private$.test_  <- private$.data_as_df[-train_indices, ] %>% 
             mldr_from_dataframe(labelIndices = lab_cols, name = "test_")
           
-          # Split reference
+          # Set samples for training and testing
           train_samples <- rownames(private$.train_$dataset)
           test_samples  <- rownames(private$.test_$dataset)
-        }else{
+        
+        } # Some training samples have been required, but none is present in the data
+        else{
+          
           private$.train_ <- NULL
           private$.test_  <- private$.data
           
-          # Split reference
+          # Set samples for training and testing
           train_samples <- c()
           test_samples  <- private$.test_$dataset$aliquot_id
         }
         
       }  
       
+      # Split the reference with the train and test samples set before
       private$.split_reference(train_samples, test_samples)
     
     }
     
   ),
   
+  ##### Active fields #####
+  # Read-only access to private fields; the missing ones are inherited from Data.
+  
   active = list(
     class_thr = function(v){
       if (missing(v))
         private$.class_thr
       else
-        stop('class_thr is read-only')
+        stop('PercentileMLData: class_thr is read-only')
         
     }
   )

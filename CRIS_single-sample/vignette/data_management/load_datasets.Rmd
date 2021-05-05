@@ -16,6 +16,7 @@ library(here)
 source(here('src','load_libraries.r'))
 source(here('src','utils','source_utils.r'))
 source(here('src','loader_writer','load_data.r'))
+source(here('src','data_management','source_data_management.r'))
 ```
 
 # TCGA\_HG19 dataset
