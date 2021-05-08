@@ -200,3 +200,54 @@ any_uncomplete <- function(df){
  
   return(any(check))
 }
+
+
+
+merge_lists <- function(...){
+  
+  # Put arguments into list
+  args <- list(...)
+  merged <- list()
+
+  for (n in seq(length(args))){
+    if (check_type(args[[n]], 'list', 0)){
+      for (m in names(args[[n]]))
+        merged[[m]] <- args[[n]][[m]]
+    }else if (!check_type(args[[n]], 'list') & !check_type(names(args)[n], 'null')){
+      merged[[names(args)[n]]] <- args[[n]]
+    }else{
+      i <- length(merged)
+      merged[[i + 1]] <- args[[n]]
+    }
+  }
+  
+  if (length(merged) > 0)
+    return(simplify_list(merged))
+  else
+    return(merged)
+}
+
+
+simplify_list <- function(l){
+  if (class(l) == 'list' & length(l) == 1 & class(l[[1]]) == 'list'){
+    return(l[[1]])
+  }
+  
+  if (class(l) == 'list' & length(l) >= 1){
+    for (i in seq(length(l))){
+      while (class(l[[i]]) == 'list' & length(l[[i]]) == 1){
+          n <- ''
+          if (!is.null(names(l[i])) & any(names(l[i]) != ''))
+            n <- names(l[i])
+          if (!is.null(names(l[[i]])) & any(names(l[[i]]) != ''))
+            n <- names(l[[i]])
+    
+          l[i] <- l[[i]]
+          names(l)[i] <- n
+        }
+    }
+    return(l)
+  }
+  
+  
+}

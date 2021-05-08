@@ -42,7 +42,7 @@ FeatureManager <- R6Class(
       target  <- ref %>%  arrange(aliquot_id) %>%
                  select(CLASS_LABEL) %>%
                  unlist() %>%
-                 factor(levels(F_CRIS_CLASSES))
+                 factor(CRIS_CLASSES)
                 
       # Debug
       # if (!all.equal(rownames(target), rownames(fs_data)))
@@ -124,7 +124,7 @@ FeatureManager <- R6Class(
         
       }
       
-      features[,CLASS_LABEL] <- factor(features[,CLASS_LABEL], levels(F_CRIS_CLASSES))
+      features[,CLASS_LABEL] <- factor(features[,CLASS_LABEL], CRIS_CLASSES)
       features <- features %>% mutate(Class = as.integer(features[,CLASS_LABEL]))
       return(features)
       

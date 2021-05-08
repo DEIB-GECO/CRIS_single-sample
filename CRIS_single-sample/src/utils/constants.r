@@ -27,7 +27,7 @@ PATIENT_LABEL_LENGTH <- as.integer(12)
 CLASS_LABEL          <- "predict.label2"
 CRIS_CLASSES         <- c("CRIS-A", "CRIS-B", "CRIS-C", "CRIS-D", "CRIS-E")
 F_CRIS_CLASSES       <- ordered(CRIS_CLASSES)
-N_CLASSES            <- nlevels(F_CRIS_CLASSES)
+N_CLASSES            <- length(CRIS_CLASSES)
 
 # Distance attributes for NTP
 BEST_DISTANCE_LABEL  <- "dist.to.template"

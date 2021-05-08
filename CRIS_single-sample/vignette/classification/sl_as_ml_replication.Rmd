@@ -1,0 +1,191 @@
+---
+title: "Single-label replication"
+output: html_notebook
+---
+
+# Setup
+
+In order to load the data, the *here* library is used to access the path with respect to the working directory of the project (CRIS_single-sample folder, which contains the .Rproj file). 
+
+```{r setup}
+library(here)
+source(here('src','load_libraries.r'))
+source(here('src','utils','source_utils.r'))
+source(here('src','loader_writer','load_data.r'))
+source(here('src','data_management','source_data_management.r'))
+source(here('src','classifiers','source_classifiers.r'))
+source(here('src','pipelines','source_pipelines.r'))
+```
+
+# Objective
+
+Adapt the single-label classifier models to cope with multi-label classification directly. First, the single-label classifiers are trained as usual (see sl_replication.Rmd vignette). Then, thresholds are computed through ROC curves. Finally, results are binarized assigning classes for which the class score is above the thresholds.
+
+# Data loading
+
+The single-label classifiers are trained on training TCGA data samples. The data can be loaded with:
+
+```{r sldata}
+sldata <- load_prepared_tcga_data(confident = 'conf',
+                                  uniformed = TRUE,
+                                  fs_type = 'ntp_only',
+                                  type = 'sl',
+                                  load_training = TRUE)
+```
+
+The structure of training data (accessed with *train_* field) and its corresponding reference (*train_ref* field) can be inspected with:
+
+```{r train_data_structure}
+head(sldata$train_)
+head(sldata$train_ref)
+```
+
+However, to compute the performance metrics relative to a multi-label classifier, a multi-label target is required. To do this, simply load the mldata too.
+
+```{r mldata}
+mldata <- load_prepared_tcga_data(confident = 'conf',
+                                  uniformed = TRUE,
+                                  fs_type = 'ntp_only',
+                                  type = 'ml',
+                                  load_training = TRUE)
+```
+
+
+# The generic single-label classifier model
+
+The single-label classifier models are actually functions that describe the class label as function of the feature genes. Therefore, the formula to model the classifiers is:
+
+```{r sl_formula}
+.SL_FORMULA
+```
+
+Obviously, the class label is included in the training data.
+
+```{r check_train_data}
+CLASS_LABEL %in% colnames(sldata$train_)
+```
+
+The methods that can be used to train single-label classifiers are hold in:
+
+```{r sl_available_models}
+methods
+```
+
+# Training with default hyperparameter tuning
+
+The formula described above is used within the library *caret* to model the single-label classifier. In order to train the model with default tuning (provided by caret).
+
+```{r default_training}
+sl_train <- sl_pipeline_train(sldata = sldata,
+                              method = methods[1],           # linear SVM, one of the applied models
+                              sl_formula = .SL_FORMULA,
+                              seed = .SEED)
+```
+
+The obtained model can be accessed with:
+
+```{r lsvm_default_tuning}
+lsvm_default <- sl_train$model
+```
+
+# Training with custom tuning
+
+It is possible to tune the model with custom tuning values, which are defined in *src/classifiers/classifiers_settings.r*. In order to do this, it is sufficient to provide a *trainControl* settings (defined in the above script as *fit_control*) and a list of tuning values, which can be accessed using the method name as follows:
+
+```{r lsvm_tuning_grid}
+# Linear SVM tuning values
+tune_grid[[methods[1]]]
+```
+
+The function to be called in order to train a linear SVM with custom tuning is the following:
+
+```{r custom_tuning_function}
+sl_train_tuned <- sl_pipeline_train(sldata = sldata,
+                                    method = methods[1],      # linear SVM, one of the applied models
+                                    sl_formula = .SL_FORMULA,
+                                    seed = .SEED,
+                                    tune = TRUE,
+                                    fit_control = fit_control,
+                                    tune_grid = tune_grid[[methods[1]]])
+```
+
+As before, the model can be extracted with:
+
+```{r custom_tuned_lsvm}
+lsvm_custom <- sl_train_tuned$model
+```
+
+# Thresholds
+
+Once that the single-label classifier model has been obtained, the thresholds can be computed with:
+
+```{r}
+lsvm_ml_thr_default <- sl_pipeline_thresholds(sldata = sldata,
+                                              method = methods[1],
+                                              seed = .SEED,
+                                              model = lsvm_default,
+                                              png_path = here('lsvm_ml_default_roc.png'),
+                                              mldata = mldata)
+```
+
+For the tuned model, similarly:
+
+```{r}
+lsvm_ml_thr_tuned <- sl_pipeline_thresholds(sldata = sldata,
+                                              method = methods[1],
+                                              seed = .SEED,
+                                              model = lsvm_custom,
+                                              png_path = here('lsvm_ml_tuned_roc.png'),
+                                              mldata = mldata)
+```
+
+
+# Testing of the model
+
+In order to test the obtained model, it is possible to use a custom testing pipeline, providing both the sldata, the mldata and the obtained model. In order to transform the continuous scores into binary assignments, the class thresholds are required. *max_cls* and *min_cls* are class-specific constants used to normaliza the scores in [0;1] after that an embedded softmax layer is removed. These constants are computed during the computation of the class thresholds and thus can be easily accessed:
+
+```{r testing_default_model}
+
+lsvm_default_testing <- sl_pipeline_test(sldata = sldata,
+                                         method = methods[1],
+                                         seed = .SEED,
+                                         model = lsvm_default,
+                                         cl_thresholds = lsvm_ml_thr_default$thresholds,
+                                         mldata = mldata,
+                                         max_cls = lsvm_ml_thr_default$max_cls,
+                                         min_cls = lsvm_ml_thr_default$min_cls)
+
+```
+
+The performance of the classification can be visualized with
+
+```{r performance_default_model}
+
+print(lsvm_default_testing$metrics)
+
+```
+
+Similarly, for the custom model:
+
+```{r testing_custom_model}
+
+lsvm_custom_testing <- sl_pipeline_test(sldata = sldata,
+                                        method = methods[1],
+                                        seed = .SEED,
+                                        model = lsvm_custom,
+                                        cl_thresholds = lsvm_ml_thr_tuned$thresholds,
+                                        mldata = mldata,
+                                        max_cls = lsvm_ml_thr_tuned$max_cls,
+                                        min_cls = lsvm_ml_thr_tuned$min_cls)
+print(lsvm_custom_testing$metrics)
+```
+
+# Biological validation
+
+
+
+
+
+
+
+

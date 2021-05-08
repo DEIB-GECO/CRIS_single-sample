@@ -107,7 +107,7 @@ CRISData <- R6Class(
     initialize = function(data, ref = NULL){
      
       # Set classes
-      private$.classes <- levels(F_CRIS_CLASSES)
+      private$.classes <- CRIS_CLASSES
       
       # Check and assign data expressionset
       private$.validate_data(data)

@@ -1,0 +1,57 @@
+---
+title: "TSP replication"
+output: html_notebook
+---
+
+# Setup
+
+In order to load the data, the *here* library is used to access the path with respect to the working directory of the project (CRIS_single-sample folder, which contains the .Rproj file). 
+
+```{r setup}
+library(here)
+source(here('src','load_libraries.r'))
+source(here('src','utils','source_utils.r'))
+source(here('src','loader_writer','load_data.r'))
+source(here('src','data_management','source_data_management.r'))
+source(here('src','classifiers','source_classifiers.r'))
+source(here('src','pipelines','source_pipelines.r'))
+
+```
+
+# TSP replication 
+In order to apply the TSP classifier, it is sufficient to apply the pipeline on *CRISData* object.
+
+```{r confident_testing_cris_signature}
+
+tsp_data <- load_prepared_tcga_data(confident = 'conf',
+                                    uniformed = TRUE,
+                                    fs_type = 'ntp_only',
+                                    type = 'cris',
+                                    samples_filter = load_tcga_testing_samples()
+                                    )
+tsp_res <- tsp_pipeline(tsp_data)
+print(tsp_res$metrics)
+```
+
+In this case, the pipeline has been applied *only on the 169 TCGA data used for testing in single-label and multi-label alternative classifiers*. In order to apply the TSP classifier on the entire TCGA dataset:
+
+```{r all_samples_cris_signature}
+tsp_all <- load_prepared_tcga_data(confident = 'all',
+                                    uniformed = TRUE,
+                                    fs_type = 'ntp_only',
+                                    type = 'cris')
+
+tsp_res_all <- tsp_pipeline(tsp_all)
+print(tsp_res_all$metrics)
+```
+
+NB: the only accepted value for *fs_type* is ntp_only. Other values will give error during the execution of the pipeline:
+
+```{r other_signature}
+tsp_bio <- load_prepared_tcga_data(confident = 'all',
+                                    uniformed = TRUE,
+                                    fs_type = c('bio_driven','ntp_only'),
+                                    type = 'cris')
+tsp_pipeline(tsp_bio)
+
+```

@@ -1,0 +1,210 @@
+---
+title: "Multi-label problem transformation replication"
+output: html_notebook
+---
+
+# Setup
+
+In order to load the data, the *here* library is used to access the path with respect to the working directory of the project (CRIS_single-sample folder, which contains the .Rproj file). 
+
+```{r setup}
+library(here)
+source(here('src','load_libraries.r'))
+source(here('src','utils','source_utils.r'))
+source(here('src','loader_writer','load_data.r'))
+source(here('src','data_management','source_data_management.r'))
+source(here('src','classifiers','source_classifiers.r'))
+source(here('src','pipelines','source_pipelines.r'))
+```
+
+# Data loading
+
+The multi-label problem transformation classifiers are trained on training TCGA data samples. The data can be loaded with:
+
+```{r mldata}
+mldata <- load_prepared_tcga_data(confident = 'conf',
+                                  uniformed = TRUE,
+                                  fs_type = 'ntp_only',
+                                  type = 'ml',
+                                  load_training = TRUE)
+```
+
+The structure of training data (accessed with *train_* field) and its corresponding reference (*train_ref* field) can be inspected with:
+
+```{r train_data_structure}
+head(mldata$train_$dataset)
+head(mldata$train_ref)
+```
+
+The train data are kept into a *mldr* object. The data.frame can be accessed through its dataset field.
+
+# The generic multi-label problem-transformation model
+
+The multi-label problem transformation classifier models are based on a divide and conquer approach: the multi-label classifier is actually a set of multiple single-label classifiers, each one solving a 1-vs-all classification for each CRIS. Differently from the single-label classifiers, in multi-label classifiers a binary target is required. An example is shown below:
+
+```{r binary_target}
+head(mldata$train_$dataset[,CRIS_CLASSES])
+```
+
+There are three available strategies (i.e. approaches used to subdivide the original problems):
+
+```{r ml_available_strategies}
+STRATEGIES
+```
+
+The **binary relevance (br)** creates 5 different independent classifiers (one for each class). The **classifier chain (cc)** creates 5 different classifiers as well connected in a chain (the order of the classifiers is relevant): each one uses as additional features the outcome of the previous classifiers in the chain. The **ensemble of classifier chains (ecc)** creates several classifier chains, each one with a different class order. BR, CC, ECC can be solved using different base algorithm (i.e. classifier used to solve each single-label sub-problem):
+
+```{r ml_available_base_algorithms}
+ALGORITHMS
+```
+
+We have developed BR and CC with LSVM, RSVM, PSVM and RF (obtaining 8 problem transformation multi-label classifiers). The ECC classifier (ensemble of classifier chains) is highly computational demanding, thus we have used it only with lsvm. Overall, we have attempted 9 multi-label problem transformation classifiers.
+
+# Classifiers settings
+
+The settings of each classifiers are kept into *settings*, a list of *AlgSettings* objects, each one holding the settings of each problem-transformation classifiers.
+The applicable classifiers are accessible with:
+
+```{r pt_models_names}
+names(settings)
+```
+
+The most important settings of a single model (e.g. br_lsvm) are:
+
+```{r br_lsvm_settings}
+settings$br_lsvm$strat              # strategy (br/ecc/cc)
+settings$br_lsvm$alg                # base algorithm type (SVM/RF)
+settings$br_lsvm$params             # tuning parameters names
+settings$br_lsvm$other_params       # fixed parameters
+settings$br_lsvm$tune_grid          # tune grid for hyperparameter tuning
+```
+
+# Training with default hyperparameters
+
+In order to train a model with the default hyperparameter values (no cross-validation applied), it is sufficient to:
+
+```{r default_training_br_lsvm}
+ml_train <- ml_pipeline_train(mldata  = mldata,                 # PercentileMLData object
+                              seed    = .SEED,
+                              cv_set  = NULL,
+                              alg_set = settings$br_lsvm,       # AlgSettings object
+                              tune    = FALSE)              
+
+```
+
+The obtained model can be accessed with:
+
+```{r br_lsvm_default_model}
+br_lsvm_default <- ml_train$model
+```
+
+# Training with custom tuning
+
+It is possible to tune the model with custom tuning values, which are defined in *src/classifiers/classifiers_settings.r*. In order to do this, it is sufficient to provide CV settings and putting tune parameter to TRUE in the *ml_pipeline_train* function. The tuning grid that will be used is accessible from the *AlgSettings* object
+
+```{r br_lsvm_tuning_grid}
+# Binary Relevance with Linear SVM tuning values
+settings$br_lsvm$tune_grid
+```
+
+The CV settings are provided with a *CVSettings* object. Its default parameters are:
+
+```{r cv_settings}
+cvset <- CVSettings$new()
+cvset$folds            # number of folds
+cvset$sampling         # type of sampling used when generating the folds
+cvset$measures         # metrics used to evaluate the tuning performances
+cvset$sel_order        # order of the metrics used to choose the best hyperparameter. A '<' indicates that the smaller the value of the metric, the better the performance is.
+```
+
+Obviously, the above parameters can be customized using the constructor. The function to be called in order to train the model with hyper-parameter tuning is:
+
+```{r br_lsvm_with_tuning}
+ml_train_tuned <- ml_pipeline_train(mldata  = mldata,                 # PercentileMLData object
+                                    seed    = .SEED,
+                                    cv_set  = CVSettings$new(),
+                                    alg_set = settings$br_lsvm,       # AlgSettings object
+                                    tune    = TRUE)              
+
+```
+
+As before, the model can be extracted with:
+
+```{r tuned_br_lsvm}
+br_lsvm_custom <- ml_train_tuned$model
+```
+
+The results of the cross-validations can be inspected with:
+
+```{r cv_results}
+ml_train_tuned$cv_res
+```
+
+
+# Thresholds computations
+
+The obtained classifiers return continuous score for each class. In order to transform the scores into binary target, we need to derive thresholds. These thresholds can be computed with:
+
+```{r thr_br_lsvm}
+br_lsvm_thr       <-  ml_pipeline_thresholds(mldata = mldata,
+                                             seed = .SEED,
+                                             cv_set = CVSettings$new(),
+                                             alg_set = settings$br_lsvm,
+                                             model = br_lsvm_default,
+                                             png_path = here('br_lsvm_roc_default.png'))
+
+br_lsvm_thr_tuned <-  ml_pipeline_thresholds(mldata = mldata,
+                                             seed = .SEED,
+                                             cv_set = CVSettings$new(),
+                                             alg_set = settings$br_lsvm,
+                                             model = br_lsvm_custom,
+                                             png_path = here('br_lsvm_roc_tuned.png'))
+
+```
+
+
+# Testing of the models
+
+In order to test the obtained model, it is possible to use a custom testing pipeline, providing both the sldata and the obtained model.
+
+```{r testing_default_model}
+
+br_lsvm_default_testing <- ml_pipeline_test(mldata = mldata,
+                                            seed = .SEED,
+                                            cv_set = CVSettings$new(),
+                                            model = br_lsvm_default,
+                                            cl_thresholds = br_lsvm_thr$thresholds,
+                                            png_path = here('br_lsvm_roc_default_testing.png'))
+
+```
+
+The performance of the classification can be visualized with
+
+```{r performance_default_model}
+
+print(br_lsvm_default_testing$metrics)
+
+```
+
+Similarly, for the custom model:
+
+```{r testing_performance_tuned_model}
+
+br_lsvm_tuned_testing <- ml_pipeline_test(mldata = mldata,
+                                            seed = .SEED,
+                                            cv_set = CVSettings$new(),
+                                            model = br_lsvm_custom,
+                                            cl_thresholds = br_lsvm_thr_tuned$thresholds,
+                                            png_path = here('br_lsvm_roc_tuned_testing.png'))
+print(br_lsvm_tuned_testing$metrics)
+```
+
+# Biological validation
+
+
+
+
+
+
+
+

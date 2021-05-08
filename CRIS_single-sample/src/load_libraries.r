@@ -3,6 +3,7 @@
 library(Biobase)                  # ExpressionSet object
 library(caret)                    # Single-label classification
 library(crayon)                   # Colored prints
+library(CRISclassifier)           # Library for the CRIS classifiers (NTP and TSP)
 library(glmnet)                   # Generalized linear model for lasso
 library(here)                     # Relative paths
 library(fs)                       # File paths manipulation

@@ -386,8 +386,14 @@ load_features_grch38 <- function(dataset = 'tcga'){
 
 
 # TODO: CHECK
-load_prepared_tcga_data <- function(confident, uniformed, fs_type, type = 'sl',  samples_filter = NULL, load_training = TRUE){
-  
+load_prepared_tcga_data <-
+  function(confident,
+           uniformed,
+           fs_type,
+           type = 'sl',
+           samples_filter = NULL,
+           load_training = TRUE) {
+    
   # Data loading
   load_gmql_grch38(original = FALSE, filtered = TRUE, uniformed = uniformed)
   
