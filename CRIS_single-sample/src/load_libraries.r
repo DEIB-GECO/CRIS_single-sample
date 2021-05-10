@@ -8,6 +8,7 @@ library(glmnet)                   # Generalized linear model for lasso
 library(here)                     # Relative paths
 library(fs)                       # File paths manipulation
 library(R6)                       # R classes
+library(RColorBrewer)             # Colors for legends in R plots
 library(stringr)                  # String manipulation
 library(tidyverse)                # Data.frames manipulation and %>% pipe
 library(readxl)                   # Read excel files

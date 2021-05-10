@@ -15,6 +15,7 @@ source(here('src','loader_writer','load_data.r'))
 source(here('src','data_management','source_data_management.r'))
 source(here('src','classifiers','source_classifiers.r'))
 source(here('src','pipelines','source_pipelines.r'))
+source(here('src','biological_validation','source_biological_validation.r'))
 
 ```
 
@@ -47,11 +48,77 @@ print(tsp_res_all$metrics)
 
 NB: the only accepted value for *fs_type* is ntp_only. Other values will give error during the execution of the pipeline:
 
-```{r other_signature}
+```{r other_signature, eval=FALSE, include=FALSE}
 tsp_bio <- load_prepared_tcga_data(confident = 'all',
                                     uniformed = TRUE,
                                     fs_type = c('bio_driven','ntp_only'),
                                     type = 'cris')
 tsp_pipeline(tsp_bio)
 
+```
+
+
+# Kaplan Meier curves
+
+In order to plot the Kaplan-meier curve, we need first to prepare the data and then computing the curve. Finally, we can use the obtained result to show the plot.
+
+```{r}
+# Object that handles the Kaplan Meier computation
+annot <- read_excel(path_loader$get_path('GMQL_GRCH38_ANNOT'))
+biopl <- BiologicalPlots$new(annotations = annot, xlim = 36)
+
+# Prepare the data for Kaplan Meier
+ref   <- tsp_res$binary_res %>% rownames_to_column(ALIQUOT_LABEL)
+km_tsp_ref <- biopl$ref_kaplan_meier(ref, type = 'sl', cl = 'CRIS-B')
+
+# Compute the Kaplan Meier
+km_tsp <- biopl$compute_kaplan_meier(km_tsp_ref, group = 'ref',cl = 'CRIS-B')
+
+# Show the plot
+biopl$show_km_plot(km_tsp, alg_name = 'tsp')
+```
+
+
+# Biological validation
+
+In order to perform the biological Fisher tests, it is sufficient to create an annotation object (TCGA or PDX, depending on the dataset) and, after having read the biological annotations, simply call two functions:
+
+```{r tcga_bio_validation}
+# Create the annotation object and read the annotations
+ann      <- AnnotationTCGA$new()
+annot    <- read_excel(path_loader$get_path('GMQL_GRCH38_ANNOT'))
+
+# Get count of each variable (used to build contingency tabel of fisher tests) and perform fisher tests
+count_tsp <- ann$get_count_annot_sl(tsp_res, annot, 'sl')
+tests_tsp <- ann$perform_stat_tests(count_tsp)
+```
+
+
+```{r pdx_testing_and_bio_validation}
+# Read PDX data
+crisdata_pdx <- load_prepared_pdx_data(confident = 'conf',
+                                     uniformed = TRUE,
+                                     fs_type = 'ntp_only',
+                                     type = 'cris')
+# Apply the classifier on PDX data
+tsp_pdx <- tsp_pipeline(crisdata_pdx)
+print(tsp_pdx$metrics)
+
+# Create the annotation object and read the annotations
+ann_pdx   <- AnnotationPDX$new()
+annot_pdx <- read_excel(path_loader$get_path('PDX_MERGED_ANNOT'))
+
+# Get count of each variable (used to build contingency table of fisher tests) and perform fisher tests
+count_tsp_pdx <- ann_pdx$get_count_annot_sl(tsp_pdx, annot_pdx, 'sl')
+tests_tsp_pdx <- ann_pdx$perform_stat_tests(count_tsp_pdx) 
+```
+
+In order to save the data to draw forest plots in excel:
+
+```{r forest_plots}
+biopl <- BiologicalPlots$new(annotations = annot)
+tsp_forest_plots <- biopl$compute_all_forest_plots(.FOREST_ATTRIBUTES$tcga, 
+                                                  .FOREST_LABEL_ATTRIBUTES$tcga, 
+                                                  .FOREST_CLASSES, 
+                                                  tests_tsp)
 ```

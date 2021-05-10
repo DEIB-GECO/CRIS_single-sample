@@ -336,11 +336,24 @@ tsp_pipeline <- function(crisdata){
   tsp_pred <- tsp$classify(crisdata$data)
   tsp_metr <- tsp$metrics(crisdata$ref, tsp_pred)
 
+  # Binarization
+  binary_res <- tsp_pred$cl 
+  binary_res[,CLASS_LABEL] <- as.character(binary_res[,CLASS_LABEL])
+  for (c in levels(F_CRIS_CLASSES)){
+    binary_res[binary_res[,CLASS_LABEL] == c,c] <- 1
+    binary_res[binary_res[,CLASS_LABEL] != c,c] <- 0
+  }
+  binary_res <- rbind(binary_res, tsp_pred$uncl)
+  binary_res[rownames(tsp_pred$uncl), CRIS_CLASSES] <- 0
+  binary_res[rownames(tsp_pred$uncl), CLASS_LABEL] <- ''
+  
   tsp_result <- list(
-    result = tsp_pred,
-    metrics = tsp_metr
+    pred = rbind(tsp_pred$cl, tsp_pred$uncl) %>% rownames_to_column(ALIQUOT_LABEL),
+    ref  = crisdata$ref,
+    metrics = tsp_metr,
+    binary_res = binary_res %>% as.data.frame()
   )
-
+  
   return(tsp_result)
 }
 

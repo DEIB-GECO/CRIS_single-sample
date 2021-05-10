@@ -7,7 +7,7 @@ output: html_notebook
 
 In order to load the data, the *here* library is used to access the path with respect to the working directory of the project (CRIS_single-sample folder, which contains the .Rproj file). 
 
-```{r setup}
+```{r setup_libs, include=FALSE}
 library(here)
 source(here('src','load_libraries.r'))
 source(here('src','utils','source_utils.r'))
@@ -15,6 +15,7 @@ source(here('src','loader_writer','load_data.r'))
 source(here('src','data_management','source_data_management.r'))
 source(here('src','classifiers','source_classifiers.r'))
 source(here('src','pipelines','source_pipelines.r'))
+source(here('src','biological_validation','source_biological_validation.r'))
 ```
 
 # Data loading
@@ -199,8 +200,75 @@ br_lsvm_tuned_testing <- ml_pipeline_test(mldata = mldata,
 print(br_lsvm_tuned_testing$metrics)
 ```
 
+```{r}
+# Object that handles the Kaplan Meier computation
+annot <- read_excel(path_loader$get_path('GMQL_GRCH38_ANNOT'))
+biopl <- BiologicalPlots$new(annotations = annot, xlim = 36)
+
+# Prepare the data for Kaplan Meier
+ref   <- br_lsvm_tuned_testing$binary_res %>% rownames_to_column(ALIQUOT_LABEL)
+km_br_lsvm_ref <- biopl$ref_kaplan_meier(ref, type = 'pt_ml', cl = 'CRIS-B')
+
+# Compute the Kaplan Meier
+km_br_lsvm <- biopl$compute_kaplan_meier(km_br_lsvm_ref, group = 'ref',cl = 'CRIS-B')
+
+# Show the plot
+biopl$show_km_plot(km_br_lsvm, alg_name = 'br_lsvm (ml)')
+```
+
+
 # Biological validation
 
+In order to perform the biological Fisher tests, it is sufficient to create an annotation object (TCGA or PDX, depending on the dataset) and, after having read the biological annotations, simply call two functions:
+
+```{r tcga_bio_validation}
+# Create the annotation object and read the annotations
+ann      <- AnnotationTCGA$new()
+annot    <- read_excel(path_loader$get_path('GMQL_GRCH38_ANNOT'))
+
+# Get count of each variable (used to build contingency tabel of fisher tests) and perform fisher tests
+count_ml <- ann$get_count_annot_ml(br_lsvm_tuned_testing, annot, mldata$test_ref, type = 'pt_ml')
+tests_ml <- ann$perform_stat_tests(count_ml)
+```
+
+The *perform_stat_tests* methods prints the result of each test, providing in green tests with a significative p-value (< 0.05).
+
+Obviously, the tests can be performed also on PDX (in this case, only test for **Cetuximab sensitivity** is available). In order to execute them, simply test the classifiers on PDX data, create an *AnnotationPDX* object and, after having read the correct annotation data, call the same functions:
+
+```{r pdx_testing_and_bio_validation}
+# Read PDX data
+mldata_pdx <- load_prepared_pdx_data(confident = 'conf',
+                                     uniformed = TRUE,
+                                     fs_type = 'ntp_only',
+                                     type = 'ml')
+
+# Apply the classifier on PDX data
+br_lsvm_custom_testing_pdx <- ml_pipeline_test(mldata = mldata_pdx,
+                                               seed = .SEED,
+                                               cv_set = CVSettings$new(),
+                                               model = br_lsvm_custom,
+                                               cl_thresholds = br_lsvm_thr_tuned$thresholds,
+                                               png_path = here('br_lsvm_roc_tuned_testing_pdx.png'))
+print(br_lsvm_custom_testing_pdx$metrics)
+
+# Create the annotation object and read the annotations
+ann_pdx   <- AnnotationPDX$new()
+annot_pdx <- read_excel(path_loader$get_path('PDX_MERGED_ANNOT'))
+
+# Get count of each variable (used to build contingency table of fisher tests) and perform fisher tests
+count_ml_pdx <- ann_pdx$get_count_annot_ml(br_lsvm_custom_testing_pdx, annot_pdx, mldata_pdx$test_ref, type = 'pt_ml')
+tests_ml_pdx <- ann_pdx$perform_stat_tests(count_ml_pdx) 
+```
+
+In order to save the data to draw forest plots in excel:
+
+```{r forest_plots}
+biopl <- BiologicalPlots$new(annotations = annot)
+sl_forest_plots <- biopl$compute_all_forest_plots(.FOREST_ATTRIBUTES$tcga, 
+                                                  .FOREST_LABEL_ATTRIBUTES$tcga, 
+                                                  .FOREST_CLASSES, 
+                                                  tests_ml)
+```
 
 
 

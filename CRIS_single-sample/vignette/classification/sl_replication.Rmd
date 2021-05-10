@@ -15,6 +15,7 @@ source(here('src','loader_writer','load_data.r'))
 source(here('src','data_management','source_data_management.r'))
 source(here('src','classifiers','source_classifiers.r'))
 source(here('src','pipelines','source_pipelines.r'))
+source(here('src','biological_validation','source_biological_validation.r'))
 ```
 
 # Data loading
@@ -132,11 +133,76 @@ lsvm_custom_testing <- sl_pipeline_test(sldata = sldata,
 print(lsvm_custom_testing$metrics)
 ```
 
+# Kaplan Meier curves
+
+In order to plot the Kaplan-meier curve, we need first to prepare the data and then computing the curve. Finally, we can use the obtained result to show the plot.
+
+```{r}
+# Object that handles the Kaplan Meier computation
+annot <- read_excel(path_loader$get_path('GMQL_GRCH38_ANNOT'))
+biopl <- BiologicalPlots$new(annotations = annot, xlim = 36)
+
+# Prepare the data for Kaplan Meier
+ref   <- lsvm_custom_testing$binary_res %>% rownames_to_column(ALIQUOT_LABEL)
+km_lsvm_ref <- biopl$ref_kaplan_meier(ref, type = 'sl', cl = 'CRIS-B')
+
+# Compute the Kaplan Meier
+km_lsvm <- biopl$compute_kaplan_meier(km_lsvm_ref, group = 'ref',cl = 'CRIS-B')
+
+# Show the plot
+biopl$show_km_plot(km_lsvm, alg_name = 'lsvm (single-label)')
+```
+
+
 # Biological validation
 
+In order to perform the biological Fisher tests, it is sufficient to create an annotation object (TCGA or PDX, depending on the dataset) and, after having read the biological annotations, simply call two functions:
 
+```{r tcga_bio_validation}
+# Create the annotation object and read the annotations
+ann      <- AnnotationTCGA$new()
+annot    <- read_excel(path_loader$get_path('GMQL_GRCH38_ANNOT'))
 
+# Get count of each variable (used to build contingency tabel of fisher tests) and perform fisher tests
+count_sl <- ann$get_count_annot_sl(lsvm_custom_testing, annot, 'sl')
+tests_sl <- ann$perform_stat_tests(count_sl)
+```
 
+The *perform_stat_tests* methods prints the result of each test, providing in green tests with a significative p-value (< 0.05).
+
+Obviously, the tests can be performed also on PDX (in this case, only test for **Cetuximab sensitivity** is available). In order to execute them, simply test the classifiers on PDX data, create an *AnnotationPDX* object and, after having read the correct annotation data, call the same functions:
+
+```{r pdx_testing_and_bio_validation}
+# Read PDX data
+sldata_pdx <- load_prepared_pdx_data(confident = 'conf',
+                                     uniformed = TRUE,
+                                     fs_type = 'ntp_only',
+                                     type = 'sl')
+# Apply the classifier on PDX data
+lsvm_custom_testing_pdx <- sl_pipeline_test(sldata = sldata_pdx,
+                                            method = methods[1],
+                                            seed = .SEED,
+                                            model = lsvm_custom)
+print(lsvm_custom_testing_pdx$metrics)
+
+# Create the annotation object and read the annotations
+ann_pdx   <- AnnotationPDX$new()
+annot_pdx <- read_excel(path_loader$get_path('PDX_MERGED_ANNOT'))
+
+# Get count of each variable (used to build contingency table of fisher tests) and perform fisher tests
+count_sl_pdx <- ann_pdx$get_count_annot_sl(lsvm_custom_testing_pdx, annot_pdx, 'sl')
+tests_sl_pdx <- ann_pdx$perform_stat_tests(count_sl_pdx) 
+```
+
+In order to save the data to draw forest plots in excel:
+
+```{r forest_plots}
+biopl <- BiologicalPlots$new(annotations = annot)
+sl_forest_plots <- biopl$compute_all_forest_plots(.FOREST_ATTRIBUTES$tcga, 
+                                                  .FOREST_LABEL_ATTRIBUTES$tcga, 
+                                                  .FOREST_CLASSES, 
+                                                  tests_sl)
+```
 
 
 
