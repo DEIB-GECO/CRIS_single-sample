@@ -8,13 +8,17 @@
 
 # Required libraries
 libraries <- c("caret",              # single-label classification
-               "crayon",             # coloured print 
+               "crayon",             # coloured print
+               "e1071",              # machine learning library
                "glmnet",             # generalized linear model for Lasso
                "here",               # handle paths
                "fs",                 # handle paths
+               "kernlab",            # for single-label classifiers (SVM)
                "R6",                 # handle R classes
+               "randomForest",       # execute the random forest
                "stringr",            # string utilities (string length, substring etc.)
                "tidyverse",          # handle data.frames (filter, group, etc.)
+               #"RColorBrewer",       # color palette for plots
                "readxl",             # read excel files
                "utiml"               # apply multi-label classification TODO: check since it is not on CRAN anymore
               )

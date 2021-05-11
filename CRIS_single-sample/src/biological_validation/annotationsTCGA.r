@@ -84,8 +84,8 @@ AnnotationTCGA <- R6Class(
         full_join(n_bad_prog_36, by = 'Class') %>%
         as.data.frame()
       
-      # NAs are turned into 0  
-      for (c in colnames(annot_count)){
+      # NAs are turned into 0
+      for (c in colnames(annot_count)[which(colnames(annot_count)!='Class')]){
         annot_count[is.na(annot_count[,c]),c] <- 0
       }
       
@@ -157,7 +157,7 @@ AnnotationTCGA <- R6Class(
         as.data.frame()
       
       # NAs are turned into 0  
-      for (c in colnames(annot_count)){
+      for (c in colnames(annot_count)[which(colnames(annot_count)!='Class')]){
         annot_count[is.na(annot_count[,c]),c] <- 0
       }
       

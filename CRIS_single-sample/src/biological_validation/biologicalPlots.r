@@ -175,7 +175,7 @@ BiologicalPlots <- R6Class(
       # Set required columns in ref depending on the type
       if (any(type %in% c('ntp_sl','sl'))){
         required_cols <- c(ALIQUOT_LABEL, CLASS_LABEL)
-      }else if (any(type == 'aa_ml')){
+      }else if (any(type %in% c('ntp_ml','aa_ml'))){
         required_cols <- c(ALIQUOT_LABEL, CLASS_LABEL, cl)
       }else{
         ranks <- paste('rank', CRIS_CLASSES, sep = '')
@@ -199,7 +199,7 @@ BiologicalPlots <- R6Class(
       # Call the right function depending on the type
       if (any(type %in% c('ntp_sl','sl'))){
         cl_ref <- private$.km_data_sl(cl_ref, cl)
-      }else if (any(type == 'aa_ml')){
+      }else if (any(type %in% c('ntp_ml','aa_ml'))){
         cl_ref <- private$.km_data_ml_alg_adapt(cl_ref, cl)
       }else {
         cl_ref <- private$.km_data_ml(cl_ref, cl)

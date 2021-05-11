@@ -1,0 +1,170 @@
+---
+title: "NTP replication"
+output: html_notebook
+---
+
+# Setup
+
+In order to load the data, the *here* library is used to access the path with respect to the working directory of the project (CRIS_single-sample folder, which contains the .Rproj file). 
+
+```{r setup}
+library(here)
+source(here('src','load_libraries.r'))
+source(here('src','utils','source_utils.r'))
+source(here('src','loader_writer','load_data.r'))
+source(here('src','data_management','source_data_management.r'))
+source(here('src','classifiers','source_classifiers.r'))
+source(here('src','pipelines','source_pipelines.r'))
+source(here('src','biological_validation','source_biological_validation.r'))
+
+```
+
+**NB**: For the replication of NTP classifier, actually, *n = 100,000 resamplings* were used. Here, we put a smaller number of resamplings (*100*) to allow a faster application of the classifier. It is appropriate to use at least *1000* resamplings to obtain a reliable value for BH.FDR scores.
+
+# Replication on hg19 data (with published reference)
+
+In order to apply the replication on original hg19 data, it is sufficient to:
+
+```{r hg19_replication}
+# Get the data
+load_candiolo_hg19()
+crisdata <- cris_no_ref_data_pipeline(expset = CANDIOLO_HG19)
+
+# Get the NTP features
+load_features_hg19(original = TRUE)
+
+# Get the NTP reference
+ntp_ref_hg19 <- load_published_ntp()
+
+# Replicate the NTP classification
+ntp_res_hg19 <- ntp_pipeline(crisdata = crisdata,
+                             features = features_hg19_original,
+                             repl_id = 'replication_hg19_original',  # name to distinguish different replications
+                             ntp_ref = ntp_ref_hg19,
+                             n_resempl = 100)
+
+```
+
+The result contains the obtained prediction and a comparison with the provided reference. 
+
+# NTP replication (no reference)
+
+The reference NTP classification has been obtained with the following parameters:
+
+```{r tcga_grch38_replication}
+# Get the data
+ntp_data <- load_prepared_tcga_data(confident = 'all',       # Take all the samples
+                                    uniformed = TRUE,
+                                    fs_type = 'none',        # Do not filter genes
+                                    type = 'cris_no_ref')
+# Get the NTP features
+load_features_grch38(dataset = 'tcga')
+
+# Replicate the NTP classification
+ntp_res <- ntp_pipeline(crisdata = ntp_data,
+                        features = features_grch38,
+                        repl_id = 'replication_all',         # name to distinguish different replications
+                        n_resempl = 100)
+
+```
+
+Again, we used 100000 resamplings, but here we indicate 100 only to allow a faster computation. The same procedure can be applied to classify merged PDX data too.
+
+# Reference classification
+
+The reference classifications can be loaded as:
+
+```{r}
+ntp_ref_tcga <- load_file(path_loader$get_path('NTP_REF_TCGA'))
+ntp_ref_pdx  <- load_file(path_loader$get_path('NTP_REF_PDX'))
+```
+
+The biological validation will be conducted on data used for testing, both in TCGA and in PDX. Because of this, we need to load the proper data objects as follows:
+
+```{r data_for_ntp_bio_validation}
+sldata <- load_prepared_tcga_data(confident = 'conf',
+                                   uniformed = TRUE,
+                                   fs_type = 'ntp_only',
+                                   type = 'sl')
+
+mldata <- load_prepared_tcga_data(confident = 'conf',
+                                 uniformed = TRUE,
+                                 fs_type = 'ntp_only',
+                                 type = 'ml')
+
+```
+
+We will use the *test_ref* field of each data object to obtain kaplan meier curves and fisher tests.
+
+# Kaplan Meier curves
+
+In order to plot the Kaplan-meier curve, we need first to prepare the data and then computing the curve. Finally, we can use the obtained result to show the plot.
+
+```{r kaplan_meier_ntp_sl}
+# Object that handles the Kaplan Meier computation
+annot <- load_file(path_loader$get_path('GMQL_GRCH38_ANNOT'))
+biopl <- BiologicalPlots$new(annotations = annot, xlim = 36)
+
+# Prepare the data for Kaplan Meier
+km_ntp_sl_ref <- biopl$ref_kaplan_meier(sldata$test_ref, type = 'ntp_sl', cl = 'CRIS-B')
+
+# Compute the Kaplan Meier
+km_ntp_sl <- biopl$compute_kaplan_meier(km_ntp_sl_ref, group = 'ref',cl = 'CRIS-B')
+
+# Show the plot
+biopl$show_km_plot(km_ntp_sl, alg_name = 'ntp sl')
+```
+
+Similarly, for multi-label NTP:
+
+```{r kaplan_meier_ntp_ml}
+# Object that handles the Kaplan Meier computation
+annot <- load_file(path_loader$get_path('GMQL_GRCH38_ANNOT'))
+biopl <- BiologicalPlots$new(annotations = annot, xlim = 36)
+
+# Prepare the data for Kaplan Meier
+km_ntp_ml_ref <- biopl$ref_kaplan_meier(mldata$test_ref, type = 'ntp_ml', cl = 'CRIS-B')
+
+# Compute the Kaplan Meier
+km_ntp_ml <- biopl$compute_kaplan_meier(km_ntp_ml_ref, group = 'ref',cl = 'CRIS-B')
+
+# Show the plot
+biopl$show_km_plot(km_ntp_ml, alg_name = 'ntp ml')
+```
+
+# Biological validation
+
+In order to perform the biological Fisher tests, it is sufficient to create an annotation object (TCGA or PDX, depending on the dataset) and, after having read the biological annotations, simply call two functions:
+
+```{r tcga_bio_validation_ntp_sl}
+# Create the annotation object and read the annotations
+ann      <- AnnotationTCGA$new()
+annot    <- load_file(path_loader$get_path('GMQL_GRCH38_ANNOT'))
+
+# Get count of each variable (used to build contingency table of fisher tests) and perform fisher tests
+count_ntp_sl <- ann$get_count_annot_sl(sldata$test_ref, annot, 'ntp_sl')
+tests_ntp_sl <- ann$perform_stat_tests(count_ntp_sl)
+```
+
+In order to perform the same tests on ntp multi-label:
+
+```{r tcga_bio_validation_ntp_ml}
+# Get count of each variable (used to build contingency table of fisher tests) and perform fisher tests
+count_ntp_ml <- ann$get_count_annot_ml(res = NULL, annot, mldata$ref, type = 'ntp_ml')
+tests_ntp_ml <- ann$perform_stat_tests(count_ntp_ml) 
+```
+
+In order to save the data to draw forest plots in excel:
+
+```{r forest_plots}
+biopl <- BiologicalPlots$new(annotations = annot)
+ntp_sl_forest_plots <- biopl$compute_all_forest_plots(.FOREST_ATTRIBUTES$tcga, 
+                                                      .FOREST_LABEL_ATTRIBUTES$tcga, 
+                                                      .FOREST_CLASSES, 
+                                                      tests_ntp_sl)
+
+ntp_ml_forest_plots <- biopl$compute_all_forest_plots(.FOREST_ATTRIBUTES$tcga, 
+                                                      .FOREST_LABEL_ATTRIBUTES$tcga, 
+                                                      .FOREST_CLASSES, 
+                                                      tests_ntp_ml)
+```

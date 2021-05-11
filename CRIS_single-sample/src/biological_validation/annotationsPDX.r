@@ -33,7 +33,8 @@ AnnotationPDX <- R6Class(
       colnames(n_stable) <- c('Class', 'n_stable')
       
       n_not_resistant <- full_join(n_sensitive, n_stable, by = 'Class')
-      for (c in colnames(n_not_resistant)){
+     
+      for (c in colnames(n_not_resistant)[which(colnames(n_not_resistant) != 'Class')]){
         n_not_resistant[is.na(n_not_resistant[,c]),c] <- 0
       }
       n_not_resistant[,'n_sensitive'] <- n_not_resistant[,'n_sensitive'] + n_not_resistant[,'n_stable']
@@ -57,7 +58,7 @@ AnnotationPDX <- R6Class(
       
       
       # NAs are turned into 0  
-      for (c in colnames(annot_count)){
+      for (c in colnames(annot_count)[which(colnames(annot_count)!='Class')]){
         annot_count[is.na(annot_count[,c]),c] <- 0
       }
       
@@ -92,7 +93,7 @@ AnnotationPDX <- R6Class(
         as.data.frame()
       
       # NAs are turned into 0  
-      for (c in colnames(annot_count)){
+      for (c in colnames(annot_count)[which(colnames(annot_count)!='Class')]){
         annot_count[is.na(annot_count[,c]),c] <- 0
       }
       

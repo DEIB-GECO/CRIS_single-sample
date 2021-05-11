@@ -101,7 +101,7 @@ Annotation <- R6Class(
       annot_count <- annot_count %>% column_to_rownames('Class')
       
       # Count proportions of above quantities on each class
-      for (c in colnames(annot_count)[-1]){
+      for (c in colnames(annot_count)[which(colnames(annot_count)!='Class')]){
         prop <- annot_count[cls,c]/(not_annotated[cls,'n_samples'] - not_annotated[cls, c]) %>% round(4)
         prop[is.nan(prop)] <- 0
         annot_count <- cbind(annot_count, prop)
@@ -273,7 +273,7 @@ Annotation <- R6Class(
 
 # Tests -------------------------------------------------------------------
 
-    #' @references # https://towardsdatascience.com/fishers-exact-test-in-r-independence-test-for-a-small-sample-56965db48e87
+    #' @references https://towardsdatascience.com/fishers-exact-test-in-r-independence-test-for-a-small-sample-56965db48e87
     validate_bio = function(count_annot, class, attr){
   
       na_attr <- paste('na', attr, sep = '_')
@@ -337,50 +337,7 @@ Annotation <- R6Class(
         type  = type
       ))
     
-    },
-    
-    
-    stat_tests_class_comparison = function(class, test_ntp_sl, test_ntp_ml, test_sl, test_ml, test_type, value = 'p_value'){
-      
-      ntp_sl  <- c(algorithm = 'ntp_sl', type = 'ref')
-      ntp_ml  <- c(algorithm = 'ntp_ml', type = 'ref')
-      sl   <- list()
-      ml   <- list()
-      cl_types   <- c(paste(class, 'primary'),
-                      paste(class, 'not primary'))
-      
-      sl_methods <- names(test_sl)
-      ml_methods <- names(test_ml)
-      
-      for (c in cl_types){
-        
-        ntp_sl[c] <- self$get_test_value(test_ntp_sl[[class]], value, test_type, c)
-        ntp_ml[c] <- self$get_test_value(test_ntp_ml[[class]], value, test_type, c)
-        
-        sl[[c]] <- list()
-        for (m in sl_methods){
-            sl[[c]][[m]] <- self$get_test_value(test_sl[[m]][[class]], value, test_type, c)
-        }
-        
-        sl[[c]] <- unlist(sl[[c]])
-        
-        ml[[c]] <- list()
-        for (m in ml_methods){
-          ml[[c]][[m]] <- self$get_test_value(test_ml[[m]][[class]], value, test_type, c)
-        }
-        
-        ml[[c]] <- unlist(ml[[c]])
-        
-      }  
-      
-      sl <- cbind(type = 'sl', as.data.frame(sl, check.names = FALSE)) %>% rownames_to_column('algorithm')
-      ml <- cbind(type = 'ml', as.data.frame(ml, check.names = FALSE)) %>% rownames_to_column('algorithm')
-      
-      comparison <- rbind(ntp_sl, ntp_ml, sl, ml)  
-    
-      return(comparison)
     }
-
   )
 )
 

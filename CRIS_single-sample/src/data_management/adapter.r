@@ -28,7 +28,7 @@ source(here('src', 'utils', 'source_utils.r'))
 
 #' Create an adapted dataframe from the metadata of GRCH38 (GQML)
 #' 
-#' @param dataset  The GMQL_GRC38 dataset (metadata list)
+#' @param dataset_metadata  The GMQL_GRC38 dataset (metadata list)
 #' @return         Dataset in adapted form 
 adapt_gmql_grch38 <- function(dataset_metadata){
   

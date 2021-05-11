@@ -11,8 +11,7 @@
 # Configuration for NTP replication  -------------------------------
 
 # Number of resamplings for NTP classification
-#.DEF_N_RESEMPL <- 100000
-.DEF_N_RESEMPL <- 10
+.DEF_N_RESEMPL <- 100000
 
 # Output folder (where NTP results are stored)
 .DEF_OUTPUT    <- here('output/replication')
