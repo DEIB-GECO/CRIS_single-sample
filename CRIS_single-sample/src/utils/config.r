@@ -8,6 +8,17 @@
 # File with database of paths
 .FILE_PATHS_DB_PATH <- here('src','utils','paths_db.xlsx')
 
+# Configuration for NTP replication  -------------------------------
+
+# Number of resamplings for NTP classification
+#.DEF_N_RESEMPL <- 100000
+.DEF_N_RESEMPL <- 10
+
+# Output folder (where NTP results are stored)
+.DEF_OUTPUT    <- here('output/replication')
+dir_create(.DEF_OUTPUT)
+
+
 # Configuration for the forest plots -------------------------------
 
 # Attributes to be tested

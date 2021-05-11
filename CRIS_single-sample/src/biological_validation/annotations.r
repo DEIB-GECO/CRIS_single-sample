@@ -141,7 +141,7 @@ Annotation <- R6Class(
       
       for (c in levels(F_CRIS_CLASSES)){
         if (type == 'ntp_sl'){
-          test_annot[[c]] <- biopl$ref_forest_plots(res$result, type = 'ntp_sl', cl = c)
+          test_annot[[c]] <- biopl$ref_forest_plots(res, type = 'ntp_sl', cl = c)
         }else if (type == 'sl'){
           test_annot[[c]] <- biopl$ref_forest_plots(
             res$binary_res %>% rownames_to_column(ALIQUOT_LABEL),

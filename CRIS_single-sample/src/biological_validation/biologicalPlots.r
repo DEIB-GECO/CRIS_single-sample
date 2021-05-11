@@ -173,7 +173,9 @@ BiologicalPlots <- R6Class(
         stop('BiologicalPlots: cl parameter for kaplan meier ref is invalid.')
       
       # Set required columns in ref depending on the type
-      if (any(type %in% c('ntp_sl','sl', 'aa_ml'))){
+      if (any(type %in% c('ntp_sl','sl'))){
+        required_cols <- c(ALIQUOT_LABEL, CLASS_LABEL)
+      }else if (any(type == 'aa_ml')){
         required_cols <- c(ALIQUOT_LABEL, CLASS_LABEL, cl)
       }else{
         ranks <- paste('rank', CRIS_CLASSES, sep = '')
@@ -183,7 +185,7 @@ BiologicalPlots <- R6Class(
       # Check the reference
       if (!check_type(ref, 'data.frame', dim_min = c(1,1))|
           !all(required_cols %in% colnames(ref)))
-        stop('BiologicalPlots: ref parameter for kaplan meier ref is invalid.')
+        stop('BiologicalPlots: ref parameter for kaplan meier ref is invalid (missing columns)')
       
       # Prepare the reference specific for the required class
       cl_ref <- ref %>% 

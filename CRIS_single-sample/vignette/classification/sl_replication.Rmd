@@ -139,7 +139,7 @@ In order to plot the Kaplan-meier curve, we need first to prepare the data and t
 
 ```{r}
 # Object that handles the Kaplan Meier computation
-annot <- read_excel(path_loader$get_path('GMQL_GRCH38_ANNOT'))
+annot <- load_file(path_loader$get_path('GMQL_GRCH38_ANNOT'))
 biopl <- BiologicalPlots$new(annotations = annot, xlim = 36)
 
 # Prepare the data for Kaplan Meier
@@ -161,7 +161,7 @@ In order to perform the biological Fisher tests, it is sufficient to create an a
 ```{r tcga_bio_validation}
 # Create the annotation object and read the annotations
 ann      <- AnnotationTCGA$new()
-annot    <- read_excel(path_loader$get_path('GMQL_GRCH38_ANNOT'))
+annot    <- load_file(path_loader$get_path('GMQL_GRCH38_ANNOT'))
 
 # Get count of each variable (used to build contingency tabel of fisher tests) and perform fisher tests
 count_sl <- ann$get_count_annot_sl(lsvm_custom_testing, annot, 'sl')
@@ -187,7 +187,7 @@ print(lsvm_custom_testing_pdx$metrics)
 
 # Create the annotation object and read the annotations
 ann_pdx   <- AnnotationPDX$new()
-annot_pdx <- read_excel(path_loader$get_path('PDX_MERGED_ANNOT'))
+annot_pdx <- load_file(path_loader$get_path('PDX_MERGED_ANNOT'))
 
 # Get count of each variable (used to build contingency table of fisher tests) and perform fisher tests
 count_sl_pdx <- ann_pdx$get_count_annot_sl(lsvm_custom_testing_pdx, annot_pdx, 'sl')

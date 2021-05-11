@@ -202,6 +202,130 @@ any_uncomplete <- function(df){
 }
 
 
+#' Compares the length of two ids
+#'
+#' @param id_1 A character vector
+#' @param id_2 A character vector
+#' @return Return 1 if the first id is longer, 2 if the second is longer,
+#' 0 otherwise
+#' @examples
+#' compare_id_length("a0001", "b002")
+compare_id_length <- function(id_1, id_2){
+  
+  if (check_type(id_1,'character',1,1) & check_type(id_2,'character',1,1)){
+    
+    if (str_length(id_1) > str_length(id_2))
+      return(1)                                        
+    else if (str_length(id_1) == str_length(id_2))
+      return(0)                                        
+    else
+      return(2)
+    
+  }else {
+    message <- paste("Invalid parameters detected:", id_1, id_2, sep = "\n")
+    print_error(message)
+    return(NULL)
+  }
+}
+
+
+# Information extraction --------------------------------------------------
+
+#' Given a vector of names, extracts an ID of given length for each one. 
+#' The ID starts with "TCGA-"
+#' 
+#' @param names     The vector of names from which ids are extracted
+#' @param id_length The length of the ID to extract
+#' @return A vector of same dimension of names (if no name is null) with
+#' extracted ids
+#' TESTED
+extract_tcga_id <- function(names, id_length){
+  
+  # Check validity of parameters
+  if (!check_type(names,'character',1)){
+    stop("Provide non-empty names")
+  }
+  
+  
+  if (!check_type(id_length, 'integer',1,1) ){
+    stop('A single integer id length is required')
+  }
+  
+  if (id_length < 1){
+    stop("Provide an id length > 0")
+  }
+  
+  # Prepare an empty vector to contain the ids
+  n_ids <- length(names)
+  names <- toupper(names)
+  ids <- vector("character", n_ids)
+  
+  for (i in seq(n_ids)) {
+    
+    # Find where the id starts and set the starting position
+    location <- str_locate(names[i], "TCGA")
+    if (any(is.na(location))){
+      ids[i] <- ''
+    }else{
+      starting_pos <- location[1]                       		
+    
+      # Find the ending position given the starting one and the length of the id
+      ending_pos <- starting_pos + (id_length - 1 )
+      if (ending_pos > str_length(names[i])){
+        warning('id not entirely contained. returning the available portion')
+      }
+      id <- substring(names[i], starting_pos, ending_pos)
+      
+      # Substitute the dot with the hyphen (if not present, this has no effect)
+      ids[i] <- gsub(".","-", id, fixed = TRUE)		
+    }
+    
+    
+  }
+  
+  return(ids)
+  
+}
+
+#'TESTED
+extract_pdx_id  <- function(names, id_type){
+  
+  # Check validity of parameters
+  if (!check_type(names,'character',1) | !check_type(id_type,'character',1,1)) {
+    print_error("Provide non-empty names and a single id type")
+    return(names)
+  }
+  
+  
+  # Check id_type
+  stopifnot(any(id_type == c(ALIQUOT_LABEL, PATIENT_LABEL)))
+  
+  # Prepare an empty vector to contain the ids
+  n_ids <- length(names)
+  names <- toupper(names)
+  ids <- vector("character", n_ids)
+  
+  for (i in seq(n_ids)) {
+    
+    # Find where the id starts and set the starting position
+    location <- str_locate(names[i], "CRC")
+    
+    if (id_type == ALIQUOT_LABEL){
+      starting_pos <- location[1]                       		
+      ending_pos <- starting_pos + (ALIQUOT_PDX_LENGTH - 1)           
+    }else{
+      starting_pos <- location[1] + 3                       		
+      ending_pos <- starting_pos + (PATIENT_PDX_LENGTH - 1) 
+    }
+    
+    ids[i] <- substring(names[i], starting_pos, ending_pos)
+    
+  }
+  
+  return(ids)
+}
+
+# Merging of data ------------------------------------------------------------
 
 merge_lists <- function(...){
   

@@ -22,12 +22,21 @@ ALIQUOT_LABEL_LENGTH <- as.integer(28)
 SAMPLE_LABEL_LENGTH  <- as.integer(16)
 PATIENT_LABEL_LENGTH <- as.integer(12)
 
+# Lengths of the different types of ids in PDX
+ALIQUOT_PDX_LENGTH <- as.integer(26)
+PATIENT_PDX_LENGTH <- as.integer(4)
 
 # CRIS Class attributes
 CLASS_LABEL          <- "predict.label2"
 CRIS_CLASSES         <- c("CRIS-A", "CRIS-B", "CRIS-C", "CRIS-D", "CRIS-E")
 F_CRIS_CLASSES       <- ordered(CRIS_CLASSES)
 N_CLASSES            <- length(CRIS_CLASSES)
+
+# Label for result of comparison of NTP results
+COMPARISON_NTP_LABELS <- c("id_1"   ,"id_2",
+                           "class_1","class_2",
+                           "BH.FDR1","BH.FDR2",
+                           "dist1"  ,"dist2")
 
 # Distance attributes for NTP
 BEST_DISTANCE_LABEL  <- "dist.to.template"

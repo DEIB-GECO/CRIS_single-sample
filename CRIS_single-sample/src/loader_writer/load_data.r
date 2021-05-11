@@ -24,9 +24,9 @@ load_candiolo_hg19 <- function(){
          envir = .GlobalEnv)
   
   # Load adapted format in global environment
-  # assign(x     = "adapted_CANDIOLO_HG19",
-  #        value = adapt_candiolo_tcga(CANDIOLO_HG19@assayData[["exprs"]]), 
-  #        envir = .GlobalEnv)
+  assign(x     = "adapted_CANDIOLO_HG19",
+         value = adapt_candiolo_tcga(CANDIOLO_HG19@assayData[["exprs"]]),
+         envir = .GlobalEnv)
 }
 
 
@@ -71,9 +71,9 @@ load_gmql_grch38 <- function(original = FALSE, filtered = FALSE, metadata = FALS
            value = load_file(path = path_loader$get_path("GMQL_GRCH38_ANNOT")) %>% as.data.frame(),
            envir = .GlobalEnv)
     
-    # assign(x     = "adapted_GMQL_GRCH38",
-    #        value = adapt_gmql_grch38(GMQL_GRCH38_metadata),
-    #        envir = .GlobalEnv)
+    assign(x     = "adapted_GMQL_GRCH38",
+           value = adapt_gmql_grch38(GMQL_GRCH38_metadata),
+           envir = .GlobalEnv)
   }
   
 }

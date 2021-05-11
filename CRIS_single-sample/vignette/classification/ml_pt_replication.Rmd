@@ -202,7 +202,7 @@ print(br_lsvm_tuned_testing$metrics)
 
 ```{r}
 # Object that handles the Kaplan Meier computation
-annot <- read_excel(path_loader$get_path('GMQL_GRCH38_ANNOT'))
+annot <- load_file(path_loader$get_path('GMQL_GRCH38_ANNOT'))
 biopl <- BiologicalPlots$new(annotations = annot, xlim = 36)
 
 # Prepare the data for Kaplan Meier
@@ -224,7 +224,7 @@ In order to perform the biological Fisher tests, it is sufficient to create an a
 ```{r tcga_bio_validation}
 # Create the annotation object and read the annotations
 ann      <- AnnotationTCGA$new()
-annot    <- read_excel(path_loader$get_path('GMQL_GRCH38_ANNOT'))
+annot    <- load_file(path_loader$get_path('GMQL_GRCH38_ANNOT'))
 
 # Get count of each variable (used to build contingency tabel of fisher tests) and perform fisher tests
 count_ml <- ann$get_count_annot_ml(br_lsvm_tuned_testing, annot, mldata$test_ref, type = 'pt_ml')
@@ -253,7 +253,7 @@ print(br_lsvm_custom_testing_pdx$metrics)
 
 # Create the annotation object and read the annotations
 ann_pdx   <- AnnotationPDX$new()
-annot_pdx <- read_excel(path_loader$get_path('PDX_MERGED_ANNOT'))
+annot_pdx <- load_file(path_loader$get_path('PDX_MERGED_ANNOT'))
 
 # Get count of each variable (used to build contingency table of fisher tests) and perform fisher tests
 count_ml_pdx <- ann_pdx$get_count_annot_ml(br_lsvm_custom_testing_pdx, annot_pdx, mldata_pdx$test_ref, type = 'pt_ml')
@@ -264,7 +264,7 @@ In order to save the data to draw forest plots in excel:
 
 ```{r forest_plots}
 biopl <- BiologicalPlots$new(annotations = annot)
-sl_forest_plots <- biopl$compute_all_forest_plots(.FOREST_ATTRIBUTES$tcga, 
+ml_forest_plots <- biopl$compute_all_forest_plots(.FOREST_ATTRIBUTES$tcga, 
                                                   .FOREST_LABEL_ATTRIBUTES$tcga, 
                                                   .FOREST_CLASSES, 
                                                   tests_ml)

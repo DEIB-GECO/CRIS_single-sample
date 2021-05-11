@@ -4,9 +4,6 @@
 
 # Class definition ------------------------------------------------------------
 
-.DEF_N_RESEMPL <- 100000
-.DEF_OUTPUT    <- here('output/Replication')
-
 NTPClassifier <- R6Class(
   'NTPClassifier',
   lock_objects = TRUE,

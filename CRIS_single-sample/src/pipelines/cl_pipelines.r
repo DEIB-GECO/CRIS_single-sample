@@ -1,56 +1,67 @@
-# 
-# # NTP replication ---------------------------------------------------------
-# 
-# ntp_pipeline <- function(crisdata, features, repl_id, ntp_ref = NULL, n_resempl = NULL){
-#   
-#   if (!is.null(n_resempl))
-#     ntp <- NTPClassifier$new(features,n_resempl = n_resempl)
-#   else
-#     ntp <- NTPClassifier$new(features)
-# 
-#   # Replication
-#   ntp_pred   <- ntp$classify(crisdata$data, id = repl_id)
-#   conf_count <- SummaryMaker$new()$ntp_summary_by_class(ntp_pred)
-#   ntp_summ   <- SummaryMaker$new()$count_by_attribute(ntp_pred, CLASS_LABEL)
-# 
-#   # Comparison with reference, if any
-#   if (!is.null(ntp_ref)){
-#     
-#     # Compare results sample by sample
-#     comparison <- NTPComparator$new()$compare_results(ntp_ref, ntp_pred)
-# 
-#     # Metrics
-#     ref_id_col <- grep(colnames(ntp_ref), pattern = 'id', fixed = TRUE)
-#     ref_data   <- subset(ntp_ref, ntp_ref[,ref_id_col] %in% comparison$id_1)
-#     rownames(ref_data) <- ref_data[,ref_id_col]
-#     
-#     pred_data  <- subset(ntp_pred, ntp_pred$aliquot_id %in% comparison$id_2)
-#     rownames(pred_data) <- pred_data$aliquot_id
-#     
-#     metrics <- SLMetrics$new()$metrics(ref_data, pred_data)
-#     
-#   }else{
-#     comparison  <- NULL
-#     metrics     <- NULL
-#   }
-#   
-#   ntp_result <- list(
-#     data = crisdata$data,
-#     result  = ntp_pred,
-#     summary = ntp_summ,
-#     confident  = conf_count,
-#     comparison = comparison,
-#     metrics    = metrics,
-#     cl_distr   = plot_distr(ntp_summ, percentage = TRUE, repl_id)
-#   )
-#   
-#   result_file <- paste('NTP_',repl_id, '.rds', sep = '')
-#   saveRDS(ntp_result,paste(ntp$output_folder, result_file, sep = '/'))
-#   return(ntp_result)
-# }
-# 
-# 
-# 
+
+# NTP replication ---------------------------------------------------------
+
+ntp_pipeline <- function(crisdata, features, repl_id, ntp_ref = NULL, n_resempl = NULL){
+  
+  # Check n resamplings input
+  if (any_uncomplete(n_resempl) & any(!is.null(n_resempl)))
+    stop('NTP pipeline: cannot accept infinite, NaN, NA as number of resamplings.')
+  else if (check_type(n_resempl, 'null', length_min = 1, length_max = 1))
+    ntp <- NTPClassifier$new(features)
+  else if (all(check_type(n_resempl, 'numeric', length_min= 1, length_max = 1) &
+           n_resempl >= 1))
+    ntp <- NTPClassifier$new(features, n_resempl = n_resempl)
+  else
+    stop('NTP pipeline: invalid number of resamplings.')
+
+  # Replication
+  ntp_pred   <- ntp$classify(crisdata$data, id = repl_id)
+  conf_count <- SummaryMaker$new()$ntp_summary_by_class(ntp_pred)
+  ntp_summ   <- SummaryMaker$new()$count_by_attribute(ntp_pred, CLASS_LABEL)
+
+  # Comparison with reference, if any
+  if (!is.null(ntp_ref)){
+
+    # Compare results sample by sample
+    comparison <- NTPComparator$new()$compare_results(ntp_ref, ntp_pred)
+
+    # Metrics
+    ref_id_col <- grep(colnames(ntp_ref), pattern = 'id', fixed = TRUE)
+    ref_data   <- subset(ntp_ref, ntp_ref[,ref_id_col] %in% comparison$id_1)
+    rownames(ref_data) <- ref_data[,ref_id_col]
+
+    pred_data  <- subset(ntp_pred, ntp_pred$aliquot_id %in% comparison$id_2)
+    rownames(pred_data) <- pred_data$aliquot_id
+
+    slm <- SLMetrics$new()
+    metrics <- list(
+      conf = slm$confusion_matrix(ref_data, pred_data),
+      global = slm$global_metrics(ref_data, pred_data),
+      local = slm$local_metrics(ref_data, pred_data)
+    )
+
+  }else{
+    comparison  <- NULL
+    metrics     <- NULL
+  }
+
+  ntp_result <- list(
+    data = crisdata$data,
+    result  = ntp_pred,
+    summary = ntp_summ,
+    confident  = conf_count,
+    comparison = comparison,
+    metrics    = metrics#,
+    # cl_distr   = plot_distr(ntp_summ, percentage = TRUE, repl_id)
+  )
+
+  result_file <- paste('NTP_',repl_id, '.rds', sep = '')
+  saveRDS(ntp_result,paste(ntp$output_folder, result_file, sep = '/'))
+  return(ntp_result)
+}
+
+
+
 # ML classifier -----------------------------------------------------------
 
 ml_pipeline_train <- function(mldata, seed, cv_set, alg_set, tune = FALSE){
