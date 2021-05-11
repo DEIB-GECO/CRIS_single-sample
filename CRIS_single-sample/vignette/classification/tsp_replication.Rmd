@@ -122,3 +122,5 @@ tsp_forest_plots <- biopl$compute_all_forest_plots(.FOREST_ATTRIBUTES$tcga,
                                                   .FOREST_CLASSES, 
                                                   tests_tsp)
 ```
+
+The data so obtained can be copied into the forest plot template (present in the additional files folder) following the structure already present in the template. The plots will update automatically. The only thing to be updated manually in the plots is the text of the etiquette of each test (as they represent p-values). 
