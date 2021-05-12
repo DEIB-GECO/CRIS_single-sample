@@ -1,6 +1,6 @@
 # Description -------------------------------------------------------------
 
-# Training on TCGA for SL classification
+# Training on TCGA for multi-label problem transformation classification
 
 # Dependencies ------------------------------------------------------------
 
@@ -14,13 +14,13 @@ source(here('src','pipelines','source_pipelines.r'))
 # Configuration constants -------------------------------------------------
 
 # Path for saving a file with all single-label classifier models
-.model_file       <- path_loader$get_classifier_file_path('sl', .FS_TYPE, .TUNE, path_type = 'models')
+.model_file       <- path_loader$get_classifier_file_path('ml', .FS_TYPE, .TUNE, path_type = 'models')
 
 # Path for saving a file with settings used in the training of the models
-.settings_file    <- path_loader$get_classifier_file_path('sl', .FS_TYPE, .TUNE, path_type = 'train_settings')
+.settings_file    <- path_loader$get_classifier_file_path('ml', .FS_TYPE, .TUNE, path_type = 'train_settings')
 
 # Flag to decide if saving the results on file system or not
-.SAVE <- FALSE
+.SAVE <- TRUE
 
 # Classifier settings -----------------------------------------------------
 
@@ -29,32 +29,29 @@ models <- list()
 train_settings  <- list()
 
 # Load data with settings specified in the config.r file
-sldata <- load_prepared_tcga_data(confident = .CONFIDENT_ONLY, 
+mldata <- load_prepared_tcga_data(confident = .CONFIDENT_ONLY, 
                                   uniformed = .UNIFORMED, 
                                   fs_type   = .FS_TYPE, 
-                                  type      = 'sl',
+                                  type      = 'ml',
                                   load_training = TRUE)
 
 # Hold the result of the training pipeline
 train_res <- list()
 
-for (m in methods){
+for (m in names(settings)[1]){
     
   print_debug(m)
   
-  train_res[[m]] <- sl_pipeline_train(
-      sldata  = sldata,
-      method  = m,
-      sl_formula = .SL_FORMULA,
+  train_res[[m]] <- ml_pipeline_train(
+      mldata = mldata,
+      cv_set = CVSettings$new(),
+      alg_set = settings[[m]],
       seed    = .SEED,
-      tune    = .TUNE,
-      fit_control = fit_control,
-      tune_grid = tune_grid[[m]]
+      tune    = .TUNE
     )
   
   # Save the results
   models[[m]] <- train_res[[m]]$model
-  
   
   # Save the settings of the training
   train_settings[[m]] <- list(

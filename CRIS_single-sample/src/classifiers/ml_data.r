@@ -127,7 +127,7 @@ PercentileMLData <- R6Class(
     initialize = function(cris_data, classes, class_thr){
      
       # Check input
-      if (names(class_thr) != CRIS_CLASSES | mode(class_thr) != 'numeric')
+      if (any(!names(class_thr) %in% CRIS_CLASSES) | mode(class_thr) != 'numeric')
         stop('PercentileMLData: `class_thr` must contain a nuemric threshold for each class')
       
       if (all(class(cris_data) != 'CRISData'))
