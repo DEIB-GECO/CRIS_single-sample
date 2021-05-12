@@ -220,6 +220,14 @@ load_published_ntp <- function(){
   # Adjust the class labels
   adapted[,CLASS_LABEL] <- gsub(x = adapted[,CLASS_LABEL], pattern = "CRIS", replacement = "CRIS-")
 
+  # Add the aliquot ID
+  load_candiolo_hg19()
+  adapted <- inner_join(adapted_CANDIOLO_HG19[,c(ALIQUOT_LABEL, PATIENT_LABEL)],
+                        adapted,
+                        by = PATIENT_LABEL)
+  
+  adapted <- adapted[,c(ALIQUOT_LABEL, CLASS_LABEL, BEST_DISTANCE_LABEL, BEST_FDR_LABEL)]
+  
   assign(x     = "published_ntp",
          value = adapted,
          envir = .GlobalEnv)
