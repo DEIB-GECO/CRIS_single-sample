@@ -116,11 +116,9 @@ PathLoader <- R6Class("PathLoader",
           stop("PathLoader: some input is NULL, NA, NaN or Infinite")
         
         # Check range of values
-        if (!type %in% c('sl','ml'))
-          stop('PathLoader: type can be only sl or ml.')
         
-        if (!path_type %in% c('models','train_settings'))
-          stop('PathLoader: path_type can be only models or train_settings.')
+        if (!path_type %in% c('models','train_settings', 'thresholds', 'roc'))
+          stop('PathLoader: path_type can be only models or train_settings or thresholds or roc.')
           
         if (any(!fs_type %in% c('bio_driven','ntp_only','lasso','none')))
           stop('PathLoader: type can include only bio_driven,ntp_only,lasso,none')
@@ -134,13 +132,18 @@ PathLoader <- R6Class("PathLoader",
         else
           tuned_label <- 'default'
         
-        # Create sub-directory for feature selection type
+        # Create sub-directory for feature selection and ROC curves and set extension
         base_folder        <- self$get_path('OUT_FOLDER_MODELS')
         feature_set_folder <- paste(sort(fs_type), collapse = '_')
-        folder <- dir_create(paste(base_folder, feature_set_folder, sep = '/'))
-        
+        folder <- dir_create(paste(base_folder, feature_set_folder, path_type, sep = '/'))
+        if (path_type == 'roc'){
+          extension <- '.png'
+        }else{
+          extension <- '.rds'
+        }
+      
         filename <- paste(type, path_type, tuned_label, sep = '_') %>%
-                    paste('.rds', sep = '')
+                    paste(extension, sep = '')
         
         # return the complete path
         return(paste(folder, filename, sep = '/'))
