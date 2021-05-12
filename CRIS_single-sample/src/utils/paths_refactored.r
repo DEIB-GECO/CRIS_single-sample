@@ -103,6 +103,48 @@ PathLoader <- R6Class("PathLoader",
           warning(paste("PathLoader: extension", extension, "not found in the path."))
           
         return(extension_check)
+      },
+      
+      get_classifier_file_path = function(type, fs_type, tuned, path_type){
+        
+        # Check input parameter validity
+        if (!check_type(type,'character',1,1) | !check_type(fs_type,'character',1) |
+            !check_type(tuned,'logical',1,1)  | !check_type(path_type,'character',1,1))
+          stop("PathLoader: invalid input format.")
+      
+        if (any_uncomplete(c(type, fs_type, tuned, path_type)))
+          stop("PathLoader: some input is NULL, NA, NaN or Infinite")
+        
+        # Check range of values
+        if (!type %in% c('sl','ml'))
+          stop('PathLoader: type can be only sl or ml.')
+        
+        if (!path_type %in% c('models','train_settings'))
+          stop('PathLoader: path_type can be only models or train_settings.')
+          
+        if (any(!fs_type %in% c('bio_driven','ntp_only','lasso','none')))
+          stop('PathLoader: type can include only bio_driven,ntp_only,lasso,none')
+        
+        if (any(!tuned %in% c(TRUE, FALSE)))
+          stop('PathLoader: tuned can be only true or false')
+        
+        # Build the file name
+        if (tuned)
+          tuned_label <- 'custom_tuned'
+        else
+          tuned_label <- 'default'
+        
+        # Create sub-directory for feature selection type
+        base_folder        <- self$get_path('OUT_FOLDER_MODELS')
+        feature_set_folder <- paste(sort(fs_type), collapse = '_')
+        folder <- dir_create(paste(base_folder, feature_set_folder, sep = '/'))
+        
+        filename <- paste(type, path_type, tuned_label, sep = '_') %>%
+                    paste('.rds', sep = '')
+        
+        # return the complete path
+        return(paste(folder, filename, sep = '/'))
+
       }
       
     ),

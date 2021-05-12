@@ -18,6 +18,29 @@
 dir_create(.DEF_OUTPUT)
 
 
+# Configuration for global scripts ----------------------------------------
+
+# Either all/conf/non_conf
+.CONFIDENT_ONLY <- 'conf'
+
+# Feature selection steps
+.FS_TYPE <- c('ntp_only') 
+
+# Either tcga or pdx
+.DATA  <- 'tcga'
+
+# Decide if tuning or not
+.TUNE  <- TRUE
+
+# PDX and TCGA have the same genes with same aliases
+.UNIFORMED  <- TRUE
+
+# Replication seed
+.SEED       <- 598
+
+# Compute SL classifiers as ML
+# .SL_AS_ML      <- TRUE
+
 # Configuration for the forest plots -------------------------------
 
 # Attributes to be tested
