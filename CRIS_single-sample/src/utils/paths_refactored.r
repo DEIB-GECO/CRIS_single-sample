@@ -105,7 +105,7 @@ PathLoader <- R6Class("PathLoader",
         return(extension_check)
       },
       
-      get_classifier_file_path = function(type, fs_type, tuned, path_type){
+      get_classifier_file_path = function(type, fs_type, tuned, path_type, testing_folder = NULL){
         
         # Check input parameter validity
         if (!check_type(type,'character',1,1) | !check_type(fs_type,'character',1) |
@@ -117,8 +117,8 @@ PathLoader <- R6Class("PathLoader",
         
         # Check range of values
         
-        if (!path_type %in% c('models','train_settings', 'thresholds', 'roc'))
-          stop('PathLoader: path_type can be only models or train_settings or thresholds or roc.')
+        if (!path_type %in% c('models','train_settings', 'thresholds', 'roc', 'testing'))
+          stop('PathLoader: path_type can be only models or train_settings or thresholds or roc or testing.')
           
         if (any(!fs_type %in% c('bio_driven','ntp_only','lasso','none')))
           stop('PathLoader: type can include only bio_driven,ntp_only,lasso,none')
@@ -126,16 +126,31 @@ PathLoader <- R6Class("PathLoader",
         if (any(!tuned %in% c(TRUE, FALSE)))
           stop('PathLoader: tuned can be only true or false')
         
+        # Set the subfolder (to be placed in feature set folder)
+        if (path_type == 'testing'){
+          if (!check_type(testing_folder,'character',1,1) | any_uncomplete(testing_folder))
+            stop("PathLoader: testing folder must be specified")
+          
+          if (any(!testing_folder %in% c('tcga','pdx','comparison')))
+            stop('PathLoader: testing_folder can be only tcga or pdx or comparison.')
+          
+          subfolder <- paste(path_type, testing_folder, sep = '/')
+        }else{
+          subfolder <- path_type
+        }
+        
+        # Create sub-directory for feature selection and ROC curves and set extension
+        base_folder        <- self$get_path('OUT_FOLDER_MODELS')
+        feature_set_folder <- paste(sort(fs_type), collapse = '_')
+        folder <- dir_create(paste(base_folder, feature_set_folder, subfolder, sep = '/'))
+        
         # Build the file name
         if (tuned)
           tuned_label <- 'custom_tuned'
         else
           tuned_label <- 'default'
         
-        # Create sub-directory for feature selection and ROC curves and set extension
-        base_folder        <- self$get_path('OUT_FOLDER_MODELS')
-        feature_set_folder <- paste(sort(fs_type), collapse = '_')
-        folder <- dir_create(paste(base_folder, feature_set_folder, path_type, sep = '/'))
+        
         if (path_type == 'roc'){
           extension <- '.png'
         }else{
