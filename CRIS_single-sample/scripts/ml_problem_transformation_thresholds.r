@@ -1,6 +1,7 @@
 # Description -------------------------------------------------------------
 
-# Thresholds for single-label classifiers to be adapted to multi-label classifiers
+# Thresholds for assignment of binary target of multi-label problem transformation
+# classifiers
 
 # Dependencies ------------------------------------------------------------
 
@@ -14,10 +15,10 @@ source(here('src','pipelines','source_pipelines.r'))
 # Configuration constants -------------------------------------------------
 
 # Path for saving a file with all single-label classifier models
-.model_file       <- path_loader$get_classifier_file_path('sl', .FS_TYPE, .TUNE, path_type = 'models')
+.model_file       <- path_loader$get_classifier_file_path('ml', .FS_TYPE, .TUNE, path_type = 'models')
 
 # Path for saving a file with settings used in the training of the models
-.thresholds_file  <- path_loader$get_classifier_file_path('sl', .FS_TYPE, .TUNE, path_type = 'thresholds')
+.thresholds_file  <- path_loader$get_classifier_file_path('ml', .FS_TYPE, .TUNE, path_type = 'thresholds')
 
 # Flag to decide if saving the results on file system or not
 .SAVE <- TRUE
@@ -29,12 +30,6 @@ models <- load_file(path = .model_file)
 thresholds  <- list()
 
 # Load data with settings specified in the config.r file
-sldata <- load_prepared_tcga_data(confident = .CONFIDENT_ONLY, 
-                                  uniformed = .UNIFORMED, 
-                                  fs_type   = .FS_TYPE, 
-                                  type      = 'sl',
-                                  load_training = TRUE)
-
 mldata <- load_prepared_tcga_data(confident = .CONFIDENT_ONLY, 
                                   uniformed = .UNIFORMED, 
                                   fs_type   = .FS_TYPE, 
@@ -44,23 +39,24 @@ mldata <- load_prepared_tcga_data(confident = .CONFIDENT_ONLY,
 # Hold the result of the training pipeline
 threshold_res <- list()
 
-# Compute the thresholds for the methods appearing in the models file
-for (m in intersect(methods, names(models))){
+# Compute the thresholds for the classifiers appearing in the models file
+for (m in intersect(names(settings), names(models))){
     
   print_debug(m)
   
   # File for saving the ROC curves plot
-  method <- paste('sl',m, 'train', sep = '_')
+  method <- paste('ml',m, 'train', sep = '_')
   roc_file <- path_loader$get_classifier_file_path(method, .FS_TYPE, .TUNE, path_type = 'roc')
   
   # Compute the thresholds
-  threshold_res[[m]] <- sl_pipeline_thresholds(
-    sldata = sldata,
-    method = m,
-    seed     = .SEED,
-    model    = models[[m]],
-    png_path = roc_file,
-    mldata   = mldata)
+  threshold_res[[m]] <- ml_pipeline_thresholds(
+    mldata = mldata,
+    seed = .SEED,
+    cv_set = CVSettings$new(),
+    alg_set = settings[[m]],
+    model = models[[m]],
+    png_path = roc_file
+    )
   
   # Save a time flag to specify last time thresholds have been updated
   threshold_res[['last_update']] <- Sys.time()
