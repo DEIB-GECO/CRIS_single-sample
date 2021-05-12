@@ -35,7 +35,6 @@ mldata <- load_prepared_tcga_data(confident = .CONFIDENT_ONLY,
                                   fs_type   = .FS_TYPE, 
                                   type      = 'ml',
                                   load_training = TRUE)
-
 # Hold the result of the training pipeline
 threshold_res <- list()
 

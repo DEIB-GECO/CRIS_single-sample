@@ -98,7 +98,7 @@ ml_pipeline_train <- function(mldata, seed, cv_set, alg_set, tune = FALSE){
 }
 
 
-ml_pipeline_test <- function(mldata, seed, cv_set, model, cl_thresholds, png_path){
+ml_pipeline_test <- function(mldata, seed, cv_set, model, cl_thresholds){
 
   # Declare classifier
   mlc <- MLClassifier$new(cv_set, seed, cl_thresholds)
@@ -115,8 +115,6 @@ ml_pipeline_test <- function(mldata, seed, cv_set, model, cl_thresholds, png_pat
   metrics        <- mlc$metrics(mldr_ref = mldata$test_,
                                 df_ref   = mldata$test_ref,
                                 binary_pred = pred)
-  print_info('ROC curve...')
-  mlc$roc_thresholds(model, mldata, png_path, training = FALSE)
 
   ml_result <- list(
     pred = pred,
@@ -235,6 +233,7 @@ sl_pipeline_test <- function(sldata, method, seed, model, cl_thresholds = NULL, 
 
     print_info('Binarizing results (for ML interpretation)...')
     sl_pred_binary <- slc$binarize_result_as_ml(pred %>% column_to_rownames(ALIQUOT_LABEL))
+    
     print_info('Metrics...')
     mlm <- MLMetrics$new()
     dfres <- sl_pred_binary[,CRIS_CLASSES]
