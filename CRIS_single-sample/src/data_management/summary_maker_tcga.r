@@ -22,7 +22,7 @@ SummaryMakerTCGA  <- R6Class('SummaryMakerTCGA',
     samples_summary = function(adapted_dataset){
       
       if (is.null(adapted_dataset)) {
-        print_error("Provide valid adapted dataset.")
+        stop("Provide valid adapted dataset.")
         return(data.frame())
       }
       

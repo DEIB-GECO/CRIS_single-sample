@@ -231,7 +231,7 @@ MLClassifier <- R6Class(
       # If columns provided are not sufficient, warn and take the first row
       selection <- as.data.frame(selection)
       if (nrow(selection) > 1){
-         print_warning("Selecting first row from following remaining values:")
+         warning("Selecting first row from following remaining values:")
          print(selection)
       }
       

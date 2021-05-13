@@ -223,7 +223,7 @@ compare_id_length <- function(id_1, id_2){
     
   }else {
     message <- paste("Invalid parameters detected:", id_1, id_2, sep = "\n")
-    print_error(message)
+    stop(message)
     return(NULL)
   }
 }
@@ -292,7 +292,7 @@ extract_pdx_id  <- function(names, id_type){
   
   # Check validity of parameters
   if (!check_type(names,'character',1) | !check_type(id_type,'character',1,1)) {
-    print_error("Provide non-empty names and a single id type")
+    stop("Provide non-empty names and a single id type")
     return(names)
   }
   

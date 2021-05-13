@@ -24,7 +24,7 @@ Filter  <- R6Class('Filter',
       
       # Check data
       if (is.null(data) | is.null(colnames(data))) {
-        print_error("Provide non-null and non-NA data to be filtered by feature.")
+        stop("Provide non-null and non-NA data to be filtered by feature.")
         return(NULL)
       }
 
@@ -34,7 +34,7 @@ Filter  <- R6Class('Filter',
       stopifnot(check_type(feature_name, 'character',1,1))
 
       if (length(feature_name) != 1 | !feature_name %in% colnames(data)) {
-        print_error("Provide a single valid feature name.")
+        stop("Provide a single valid feature name.")
         return(NULL)
       }
       
@@ -62,7 +62,7 @@ Filter  <- R6Class('Filter',
       stopifnot(check_type(expr_matrix,'matrix',c(1,1)), check_type(list,'character',0))
 
       if (any(check_type(rownames(as.matrix(expr_matrix)),'null') | check_type(colnames(as.matrix(expr_matrix)),'null'))) {
-        print_warning("The matrix must have rownames and colnames.")
+        warning("The matrix must have rownames and colnames.")
       }
       
       # Define filter in class extensions

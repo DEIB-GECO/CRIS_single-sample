@@ -41,7 +41,7 @@ NTPComparator  <- R6Class('NTPComparator',
        id_2 <- as.character(result_2[1,1])
        
        if (compare_id_length(id_1,id_2) == 1) {
-         print_warning("Ids' lengths are not compatible. Try to swap the datasets.")
+         warning("Ids' lengths are not compatible. Try to swap the datasets.")
          return(NULL)
        }
        
@@ -81,7 +81,7 @@ NTPComparator  <- R6Class('NTPComparator',
        
        # If something went wrong, the result is empty
        if (ncol(result_comparison) == 0) 
-         print_warning("Empty comparison dataset.")
+         warning("Empty comparison dataset.")
        else{
          
          colnames(result_comparison) <- COMPARISON_NTP_LABELS
@@ -113,13 +113,13 @@ NTPComparator  <- R6Class('NTPComparator',
      check_comparison = function(compared_ntp_result, condition, sensibility = 0.0001){
        
        if (is.null(compared_ntp_result)) {
-         print_error("Given comparing dataframe cannot be NULL.")
+         stop("Given comparing dataframe cannot be NULL.")
          return(NULL)
        }
        
        if (!condition %in% c(CLASS_LABEL,BEST_DISTANCE_LABEL, BEST_FDR_LABEL, 
                              DIFF_CONFIDENCE, UNCLASSIFIED)) {
-         print_error(paste("The attribute on which to check differences must be either:", 
+         stop(paste("The attribute on which to check differences must be either:", 
                            CLASS_LABEL,
                            BEST_DISTANCE_LABEL,
                            BEST_FDR_LABEL,

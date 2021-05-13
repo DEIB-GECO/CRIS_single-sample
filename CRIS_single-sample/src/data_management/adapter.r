@@ -33,7 +33,7 @@ source(here('src', 'utils', 'source_utils.r'))
 adapt_gmql_grch38 <- function(dataset_metadata){
   
   if (is.null(dataset_metadata) | any(dim(dataset_metadata) == 0)) {
-    print_error("Invalid input for adaptation of GMQL")
+    stop("Invalid input for adaptation of GMQL")
     return(data.frame())
   }
   
@@ -62,7 +62,7 @@ adapt_gmql_grch38 <- function(dataset_metadata){
 adapt_candiolo_tcga <- function(expr_matrix){
   
   if (is.null(expr_matrix) | any(dim(expr_matrix) == 0)) {
-    print_error("Invalid input for adaptation of TCGA")
+    stop("Invalid input for adaptation of TCGA")
     return(data.frame())
   }
   
@@ -86,7 +86,7 @@ adapt_candiolo_tcga <- function(expr_matrix){
 adapt_pdx <- function(expr_matrix){
   
   if (is.null(expr_matrix) | any(dim(expr_matrix) == 0)) {
-    print_error("Invalid input for adaptation pf PDX")
+    stop("Invalid input for adaptation pf PDX")
     return(data.frame())
   }
   # complete id model: CRC xxxx yyy tt h
@@ -255,7 +255,7 @@ adapt_pdx <- function(expr_matrix){
 .build_tumoral_flag <- function(samples_list){
   
   if (is.null(samples_list)){
-    print_error("Provide a non-null samples vector")
+    stop("Provide a non-null samples vector")
     return(replicate(length(samples_list), "-"))
   }
   # Regular expression for tumoral sample is TCGA-XX-XXXX-0AB
@@ -288,12 +288,12 @@ adapt_pdx <- function(expr_matrix){
 .adjust_class_label <- function(prediction_vector){
   
   if (!is.character(prediction_vector)) {
-    print_error("Please put a vector of character label as input.")
+    stop("Please put a vector of character label as input.")
     return(predictionVector);
   }
   
   if (is.null(prediction_vector) | length(prediction_vector) == 0) {
-    print_warning("Null or empty vector.")
+    warning("Null or empty vector.")
     return(c())
   }
   
@@ -323,7 +323,7 @@ adapt_pdx <- function(expr_matrix){
   print_info("Removing duplicated genes...")
   # Check path is for a valid gct file
   if (is.null(original_data)){
-    print_error("Provide non-null data")
+    stop("Provide non-null data")
     return(data.frame())
   }
   

@@ -22,12 +22,12 @@ Comparator  <- R6Class('Comparator',
         .is_id_in_dataset = function(id, adapted_dataset, id_type){
           
           if (!check_type(id,'character',1,1) | check_type(adapted_dataset,'null') | !check_type(id_type,'factor')) {
-            print_error("Provide valid input paramters. Returning FALSE.")
+            stop("Provide valid input paramters. Returning FALSE.")
             return(FALSE)
           }
           
           if (!id_type %in% F_ID_TYPES) {
-            print_error("Id type must be chosen inside the factor F_ID_TYPES")
+            stop("Id type must be chosen inside the factor F_ID_TYPES")
             return(FALSE)
           }
           

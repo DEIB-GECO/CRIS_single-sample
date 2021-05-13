@@ -204,7 +204,7 @@ load_file <- function(path, separator = ",", colnames = TRUE, sheet = NULL) {
     use_colnames <- replicate(length(sheets_list), colnames)
   }
   else if (length(colnames) != length(sheets_list)) {
-    print_warning("Colnames length does not match sheets length. Using TRUE.")
+    warning("Colnames length does not match sheets length. Using TRUE.")
     use_colnames <- vector("logical", length(sheets_list))
   }
   

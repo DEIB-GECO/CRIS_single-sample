@@ -24,7 +24,7 @@ SamplesManager  <- R6Class('SamplesManager',
      get_single_sample = function(path, file_extension, region_colnames){
        
        if (!is_path_valid(path, 'INPUT', extension = file_extension)){
-         print_error("Path not valid")
+         stop("Path not valid")
          return(data.frame())
        }
        

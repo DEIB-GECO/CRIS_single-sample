@@ -92,7 +92,7 @@ print_test <- function(test_outcome, test_name){
   
   .N_TESTS <<- .N_TESTS + 1
   if (!all(test_outcome == TRUE)){
-    print_error(paste('Test failed. Test objective: ', test_name))
+    stop(paste('Test failed. Test objective: ', test_name))
     .N_TESTS_FAILED   <<- .N_TESTS_FAILED + 1
   }else{
     print_success(paste('Test succeded. Test objective:', test_name))

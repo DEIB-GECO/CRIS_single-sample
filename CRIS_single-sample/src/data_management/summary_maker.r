@@ -226,7 +226,7 @@ SummaryMaker  <- R6Class('SummaryMaker',
     ntp_summary_by_class = function(ntp_pred){
       
       if (is.null(ntp_pred) | any(dim(ntp_pred) == 0)) {
-        print_error("Provide a non-null and non-empty NTP classification result.")
+        stop("Provide a non-null and non-empty NTP classification result.")
         return(data.frame())
       }
       
@@ -273,7 +273,7 @@ SummaryMaker  <- R6Class('SummaryMaker',
       
       # Check the input is non-null and non-empty
       if (is.null(tsp_pred) | any(dim(tsp_pred) == 0)) {
-        print_error("Provide a non-null and non-empty TSP prediction.")
+        stop("Provide a non-null and non-empty TSP prediction.")
         return(data.frame())
       }
       
