@@ -323,7 +323,6 @@ SingleSampleClassifier <- R6Class(
       if (any(class(prediction) == 'mlresult')){
         pred_binary <- prediction %>% as.matrix() %>% as.data.frame()
       }else{
-       
         pred_binary <- prediction[,classes] %>% as.matrix() %>% as.data.frame()
         pred_binary <- cbind(pred_binary, prediction[,CLASS_LABEL])
         colnames(pred_binary)[ncol(pred_binary)] <- CLASS_LABEL
@@ -335,12 +334,18 @@ SingleSampleClassifier <- R6Class(
       # Binarize scores (class score >= class threshold means 1, 0 otherwise)
       for (cl in classes){
         thr <- private$.cl_thresholds[cl, 'threshold']
-        if (length(pred_binary[pred_binary[,cl] < thr, cl]) > 0)
+
+        if (length(pred_binary[pred_binary[,cl] < thr, cl]) > 0){
+
           pred_binary[pred_binary[,cl] < thr, cl]  <- 0
-        if (length(pred_binary[pred_binary[,cl] >= thr, cl]) > 0)
-        pred_binary[pred_binary[,cl] >= thr, cl] <- 1
+        }
+        
+        if (length(pred_binary[pred_binary[,cl] >= thr, cl]) > 0){
+
+          pred_binary[pred_binary[,cl] >= thr, cl] <- 1
+        }
       }
-      
+
       # Add number of classes assigned at each sample
       n_classes   <- rowSums(pred_binary[,classes])
       pred_binary <- pred_binary %>% cbind(n_classes)

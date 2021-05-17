@@ -440,11 +440,13 @@ BiologicalPlots <- R6Class(
       
     },
 
-    compute_all_forest_plots = function(forest_attributes, label_attributes, classes, tests){
+    compute_all_forest_plots = function(forest_attributes, label_attributes, classes, tests, test_number_init = NULL){
       
       all_forest_plots <- data.frame()
-      test_number      <- 1
-      
+      if (is.null(test_number_init))
+        test_number      <- 1
+      else
+        test_number <- test_number_init
       for (i in seq(length(forest_attributes))){
         test_attr  <- forest_attributes[[i]]
         label_attr <- label_attributes[[i]]

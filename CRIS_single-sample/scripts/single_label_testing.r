@@ -13,11 +13,14 @@ source(here('src','pipelines','source_pipelines.r'))
 
 # Configuration constants -------------------------------------------------
 
-# Path for saving a file with all single-label classifier models
-.model_file       <- path_loader$get_classifier_file_path('sl', .FS_TYPE, .TUNE, path_type = 'models')
+if(any(.PUBLISHED_MODELS)){
+  .model_file  <- path_loader$get_path('NTP_ONLY_SL_MODELS')
+}else{
+  .model_file <- path_loader$get_classifier_file_path('sl', .FS_TYPE, .TUNE, path_type = 'models')
+}
 
-# Flag to decide if saving the results on file system or not
-.SAVE <- TRUE
+method <- paste(.DATA, 'sl', sep = '_')
+testing_file <- path_loader$get_classifier_file_path(method, .FS_TYPE, .TUNE, path_type = 'testing', testing_folder = .DATA)
 
 # Classifier settings -----------------------------------------------------
 
@@ -44,14 +47,15 @@ if (.DATA == 'tcga'){
 }
 
 # Hold the result of the testing_pipeline
-testing_res <- list()
+testing_res <- list(
+  results = list()
+)
 
 for (m in intersect(methods, names(models))){
     
   print_debug(m)
-  method <- paste(.DATA, 'sl', sep = '_')
-  testing_file <- path_loader$get_classifier_file_path(method, .FS_TYPE, .TUNE, path_type = 'testing', testing_folder = .DATA)
-  testing_res[[m]] <- sl_pipeline_test(
+  
+  testing_res$results[[m]] <- sl_pipeline_test(
       sldata = sldata,
       method = m,
       seed = .SEED,
@@ -64,8 +68,49 @@ for (m in intersect(methods, names(models))){
   # Save the time of last testing
   testing_res[['last_update']] <-  Sys.time()
   
-  # If requested, save the models and the settings
+  # If requested, save the result on rds and excel
   if (.SAVE){
     saveRDS(object = testing_res, testing_file)
+    
+    excel_path <- path_loader$get_classifier_file_path(
+                    type = paste(m, 'sl', sep = '_'),
+                    fs_type = .FS_TYPE,
+                    tuned = .TUNE,
+                    path_type = 'testing',
+                    testing_folder = .DATA,
+                    extension = '.xlsx'
+                  )
+    res_to_save <- prepare_excel_res_sl(testing_res$results[[m]], sldata$test_ref)
+    save_data_list(res_to_save, excel_path, names(res_to_save))
   }
 }
+
+
+# Comparison of metrics ---------------------------------------------------
+
+comparison_path <- path_loader$get_classifier_file_path(
+                      type = paste(.DATA, .CONFIDENT_ONLY, 'sl_comparison', sep = '_'),
+                      fs_type = .FS_TYPE,
+                      tuned = .TUNE,
+                      path_type = 'testing',
+                      testing_folder = 'comparison'
+                    )
+
+comparison <- compare_metrics(res = testing_res$results, type = 'sl')
+
+if (.SAVE){
+  
+  # Save RDS file with comparison and info on published models (if used or not)
+  saveRDS(object = list(comparison = comparison, 
+                        published_models = .PUBLISHED_MODELS), 
+          file = comparison_path)
+  
+  # Save excel version
+  save_data_list(data_list = comparison, 
+                 path_xlsx = gsub(x = comparison_path,pattern = '.rds', replacement = '.xlsx', fixed = TRUE),
+                 sheet_names = names(comparison))
+}  
+
+
+
+

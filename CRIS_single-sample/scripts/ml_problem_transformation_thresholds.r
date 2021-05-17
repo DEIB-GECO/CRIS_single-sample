@@ -4,7 +4,7 @@
 # classifiers
 
 # Dependencies ------------------------------------------------------------
-
+library(here)
 source(here('src','load_libraries.r'))
 source(here('src','utils','source_utils.r'))
 source(here('src','loader_writer','load_data.r'))
@@ -14,14 +14,12 @@ source(here('src','pipelines','source_pipelines.r'))
 
 # Configuration constants -------------------------------------------------
 
-# Path for saving a file with all single-label classifier models
-.model_file       <- path_loader$get_classifier_file_path('ml', .FS_TYPE, .TUNE, path_type = 'models')
+# Path for saving a file with all multi-label classifier models
+.model_file <- path_loader$get_classifier_file_path('ml', .FS_TYPE, .TUNE, path_type = 'models')
 
 # Path for saving a file with settings used in the training of the models
 .thresholds_file  <- path_loader$get_classifier_file_path('ml', .FS_TYPE, .TUNE, path_type = 'thresholds')
 
-# Flag to decide if saving the results on file system or not
-.SAVE <- TRUE
 
 # Classifier settings -----------------------------------------------------
 
@@ -48,7 +46,7 @@ for (m in intersect(names(settings), names(models))){
   roc_file <- path_loader$get_classifier_file_path(method, .FS_TYPE, .TUNE, path_type = 'roc')
   
   # Compute the thresholds
-  threshold_res[[m]] <- ml_pipeline_thresholds(
+  res <- ml_pipeline_thresholds(
     mldata = mldata,
     seed = .SEED,
     cv_set = CVSettings$new(),
@@ -57,8 +55,12 @@ for (m in intersect(names(settings), names(models))){
     png_path = roc_file
     )
   
+  threshold_res[[m]] <- res$thresholds
+  
   # Save a time flag to specify last time thresholds have been updated
   threshold_res[['last_update']] <- Sys.time()
+  
+  
   
   # If requested, save the models and the settings
   if (.SAVE){

@@ -28,3 +28,4 @@ source(here('src', 'classifiers', 'ml_metrics.r'))
 
 # Classifiers settings
 source(here('src', 'classifiers', 'classifiers_settings.r'))
+source(here('src', 'classifiers', 'saving_classifiers.r'))

@@ -27,7 +27,7 @@ dir_create(.DEF_OUTPUT)
 .FS_TYPE <- c('ntp_only') 
 
 # Either tcga or pdx
-.DATA  <- 'tcga'
+.DATA  <- 'pdx'
 
 # Decide if tuning or not
 .TUNE  <- TRUE
@@ -38,15 +38,22 @@ dir_create(.DEF_OUTPUT)
 # Replication seed
 .SEED       <- 598
 
-# Compute SL classifiers as ML
-# .SL_AS_ML      <- TRUE
+# Flag to decide if saving the results on file system or not
+.SAVE <- TRUE
 
-# Configuration for the forest plots -------------------------------
+# Flab to decide if using published models (TRUE) or generated models (FALSE)
+.PUBLISHED_MODELS <- TRUE
+
+
+# Configuration for the forest plots and the kaplan meier -------------------------------
+
+# Time window for kaplan meier (months)
+.XLIM <- 36
 
 # Attributes to be tested
 .FOREST_ATTRIBUTES <- list(
   tcga = c('n_mucinous','kras_mutated','n_msi_h', 'recurred_before_36'),
-  pdx  = c('n_sensible')
+  pdx  = c('n_sensitive')
 )
 
 # Name of each test
@@ -61,5 +68,5 @@ dir_create(.DEF_OUTPUT)
   kras_mutated = c('CRIS-A','CRIS-C'),
   n_msi_h = c('CRIS-A'),
   recurred_before_36 = c('CRIS-B'),
-  n_sensible = c('CRIS-C')
+  n_sensitive = c('CRIS-C')
 )

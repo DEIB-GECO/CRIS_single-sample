@@ -9,6 +9,7 @@ library(glmnet)                   # Generalized linear model for lasso
 library(here)                     # Relative paths
 library(fs)                       # File paths manipulation
 library(kernlab)                  # Single-label classifier (svm)
+library(openxlsx)                 # writing multiple excel sheets
 library(R6)                       # R classes
 library(randomForest)             # Execute the random forest
 library(RColorBrewer)             # Colors for legends in R plots

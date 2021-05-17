@@ -110,7 +110,6 @@ ml_pipeline_test <- function(mldata, seed, cv_set, model, cl_thresholds){
   print_info('Binarization...')
   ml_pred_binary <- mlc$binarize_result(pred)
   attr(pred, 'classes') <- ml_pred_binary[,CRIS_CLASSES]
-
   print_info('Metrics...')
   metrics        <- mlc$metrics(mldr_ref = mldata$test_,
                                 df_ref   = mldata$test_ref,

@@ -14,6 +14,7 @@ libraries <- c("caret",              # single-label classification
                "here",               # handle paths
                "fs",                 # handle paths
                "kernlab",            # for single-label classifiers (SVM)
+               "openxlsx",           # writing multiple excel sheets
                "R6",                 # handle R classes
                "randomForest",       # execute the random forest
                "stringr",            # string utilities (string length, substring etc.)

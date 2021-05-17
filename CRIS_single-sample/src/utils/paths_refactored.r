@@ -105,7 +105,7 @@ PathLoader <- R6Class("PathLoader",
         return(extension_check)
       },
       
-      get_classifier_file_path = function(type, fs_type, tuned, path_type, testing_folder = NULL){
+      get_classifier_file_path = function(type, fs_type, tuned, path_type, testing_folder = NULL, extension = NULL){
         
         # Check input parameter validity
         if (!check_type(type,'character',1,1) | !check_type(fs_type,'character',1) |
@@ -150,11 +150,11 @@ PathLoader <- R6Class("PathLoader",
         else
           tuned_label <- 'default'
         
-        
-        if (path_type == 'roc'){
-          extension <- '.png'
-        }else{
-          extension <- '.rds'
+        if (!any(extension %in% c('.xlsx', '.rds'))){
+          if (path_type == 'roc')
+            extension <- '.png'
+          else
+            extension <- '.rds'
         }
       
         filename <- paste(type, path_type, tuned_label, sep = '_') %>%

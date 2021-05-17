@@ -224,3 +224,45 @@ load_file <- function(path, separator = ",", colnames = TRUE, sheet = NULL) {
 
 
 
+
+#' Save a list of data into an excel file; each result is saved
+#' in a different sheet
+#' 
+#' @param data_list   Results to be saved (dataframes)
+#' @param path_xlsx   Path of the file where to save data
+#' @param sheet_names Name of the sheets in which to save the data
+#' 
+#' @return None
+save_data_list <- function(data_list, path_xlsx, sheet_names){
+
+  # Check of parameters
+  if (is.null(data_list) | is.null(sheet_names)){
+    print_error("Provide valid paramters to save normalization results.")
+    return(NULL)
+  }
+  
+  if (length(data_list) != length(sheet_names)) {
+    print_error("Provide sheet names for each data in the lsit.")
+    return(NULL)
+  }
+  
+  if (!grepl(".xlsx", path_xlsx, fixed = TRUE)) {
+    print_warning("The file is not .xlsx. Trying to save anyway")
+  }
+  
+  # Create a blank workbook
+  cores_wb <- createWorkbook()
+  
+  # Loop through the list of core dataframes and add them (with corresponding
+  # sheet name) to the workbook
+  Map(function(cores, sheet_name){
+    
+    addWorksheet(cores_wb, sheet_name)
+    writeData(cores_wb, sheet_name, cores)
+    
+  }, data_list, sheet_names)
+  
+  # Save the workbook in the given file
+  saveWorkbook(cores_wb, file = path_xlsx, overwrite = TRUE,)
+  
+}

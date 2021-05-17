@@ -13,14 +13,11 @@ source(here('src','pipelines','source_pipelines.r'))
 
 # Configuration constants -------------------------------------------------
 
-# Path for saving a file with all single-label classifier models
-.model_file       <- path_loader$get_classifier_file_path('sl', .FS_TYPE, .TUNE, path_type = 'models')
+# Paths for single-label models
+.model_file <- path_loader$get_classifier_file_path('sl', .FS_TYPE, .TUNE, path_type = 'models')
 
-# Path for saving a file with settings used in the training of the models
-.thresholds_file  <- path_loader$get_classifier_file_path('sl', .FS_TYPE, .TUNE, path_type = 'thresholds')
-
-# Flag to decide if saving the results on file system or not
-.SAVE <- TRUE
+# File where the thresholds are saved
+.thresholds_file <- path_loader$get_classifier_file_path('sl', .FS_TYPE, .TUNE, path_type = 'thresholds')
 
 # Classifier settings -----------------------------------------------------
 

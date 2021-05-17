@@ -2,12 +2,9 @@
 # Description -------------------------------------------------------------
 
 
-# Exposes four methods to print errors, warnings, success and info messages; 
+# Exposes four methods to print success and info messages; 
 # The format_message method adds color to the text and the label the message. 
 # At the end of the message, an end-of-line "\n" character is added.
-
-
-# DEPENDENCIES ------------------------------------------------------------
 
 
 # CONFIGURATION FLAGS -----------------------------------------------------
