@@ -1,6 +1,8 @@
 # CRIS_single-sample
 
-The work presented in this repository allows to apply single-sample classifiers for CRIS on colorectal cancer data. The work has been organized in the CRIS_single-sample Rproject folder. In order to use the functionalities provided by the source code, some preliminary steps must be executed. Furthermore, we recall that, since we have based the research inside an R project, any considered path is relative to the working directory of the project itself. 
+The work presented in this repository allows to apply single-sample classifiers for CRIS on colorectal cancer data. The work has been organized in the CRIS_single-sample Rproject folder. 
+
+In order to use the functionalities provided by the source code, some preliminary steps must be executed. Furthermore, we recall that, since we have based the research inside an R project, any considered path is relative to the working directory of the project itself. 
 
 The installation required is summarized in the next steps:
 
