@@ -31,11 +31,12 @@ BiologicalPlots <- R6Class(
       # be ignored and thus set as disease-free (status = 0)
       df_samples <- km_annot %>% 
         filter(df_time >= private$.xlim) %>% 
-        select(aliquot_id)
+        select(aliquot_id) %>%
+        unlist()
       
       km_annot[km_annot$aliquot_id %in% df_samples, 'df_status'] <- 0
-      km_annot[km_annot$aliquot_id %in% df_samples, 'df_time']   <- xlim
-      
+      km_annot[km_annot$aliquot_id %in% df_samples, 'df_time']   <- private$.xlim
+
       # Return the prepared annotations for KM plot
       return(km_annot)
       
@@ -274,7 +275,7 @@ BiologicalPlots <- R6Class(
       
       # Prepare the annotation for Kaplan Meier
       km_annot <- private$.prepare_km_annotations()
-      
+
       # Create the reference for kaplan meier using the above annotations
       return(private$.bio_plot_ref(ref, type, cl, km_annot))
       
@@ -366,7 +367,7 @@ BiologicalPlots <- R6Class(
       cols <- c(not_cris_col,cris_col)
       
       # Create the plot
-      plot(km_res$fit,                                 # survfit object
+      plot(km_res$fit,                                # survfit object
            col = cols,                                # curve colours
            mark.time = TRUE,                          # show ticks for censored data
            xlab = km_res$plot_data$xlab,              # label x axis

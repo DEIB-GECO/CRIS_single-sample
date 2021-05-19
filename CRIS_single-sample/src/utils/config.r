@@ -27,7 +27,7 @@ dir_create(.DEF_OUTPUT)
 .FS_TYPE <- c('ntp_only') 
 
 # Either tcga or pdx
-.DATA  <- 'pdx'
+.DATA  <- 'tcga'
 
 # Decide if tuning or not
 .TUNE  <- TRUE

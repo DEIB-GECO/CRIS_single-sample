@@ -28,8 +28,8 @@ tsp_data <- load_prepared_tcga_data(confident = 'conf',
                                     uniformed = TRUE,
                                     fs_type = 'ntp_only',
                                     type = 'cris',
-                                    samples_filter = load_tcga_testing_samples()
-                                    )
+                                    samples_filter = load_tcga_testing_samples(),
+                                    load_training = FALSE)
 tsp_res <- tsp_pipeline(tsp_data)
 print(tsp_res$metrics)
 ```
@@ -121,6 +121,17 @@ tsp_forest_plots <- biopl$compute_all_forest_plots(.FOREST_ATTRIBUTES$tcga,
                                                   .FOREST_LABEL_ATTRIBUTES$tcga, 
                                                   .FOREST_CLASSES, 
                                                   tests_tsp)
+
+
+biopl_pdx <- BiologicalPlots$new(annotations = annot_pdx)
+tsp_forest_plots_pdx <- biopl$compute_all_forest_plots(.FOREST_ATTRIBUTES$pdx, 
+                                                 .FOREST_LABEL_ATTRIBUTES$pdx, 
+                                                  .FOREST_CLASSES, 
+                                                  tests_tsp_pdx,
+                                                 max(tsp_forest_plots$Y)+1)
+
+tsp_forest_plots <- tsp_forest_plots %>% rbind(tsp_forest_plots_pdx)
+openxlsx::write.xlsx(tsp_forest_plots, here('tsp_forest_plots.xlsx'))
 ```
 
 The data so obtained can be copied into the forest plot template (present in the additional files folder) following the structure already present in the template. The plots will update automatically. The only thing to be updated manually in the plots is the text of the etiquette of each test (as they represent p-values). 

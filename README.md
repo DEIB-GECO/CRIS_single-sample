@@ -25,9 +25,12 @@ The installation required is summarized in the next steps:
 
   >  <code>    source("src/load_libraries.r") </code>
 
-9. Require the *data.zip* file containing all the data and extract it as it is in the project folder.
+9. To install the CRIS classifier, save the tar.gz (NOT zip) file of the library (provided in the root folder) in a folder and run the command
 
-  
+> <code> install.packages("path_to_tar_gz") </code>
+
+10. Require the *data.zip* file containing all the data and extract it as it is in the project folder.
+
 *NB*: The step 8 must be repeated whenever a new R session starts, otherwise errors of missing libraries are reported. In order to understand how to apply the implemented functionalities, we suggest to look at the R notebooks (.Rmd files) organized within the *vignette* folder.
 
 The reference work (NTP classifier, TSP classifier, published results of NTP and TSP, CRIS signature) is *Isella C, Brundu F, Bellomo SE, Galimi F, Zanella E, Porporato R, Petti C, Fiori A, Orzan F, Senetta R, Boccaccio C, Ficarra E, Marchionni L, Trusolino L, Medico E, Bertotti A. Selective analysis of cancer-cell intrinsic transcriptional traits defines novel clinically relevant subtypes of colorectal cancer. Nat Commun. 2017 May 31;8:15107. doi: 10.1038/ncomms15107. PMID: 28561063; PMCID: PMC5499209.*

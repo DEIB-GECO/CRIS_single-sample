@@ -104,7 +104,7 @@ for (m in names(ml_pt_testing$results)){
 
 km_fold <- paste(path_loader$get_path('OUT_FOLDER_MODELS'), .FS_TYPE, 'kaplan_meier', sep = '/')
 dir_create(km_fold)
-fname <- paste('kaplan_meier', .XLIM, '.jpg', sep = '')
+fname <- paste('kaplan_meier', .XLIM, '.jpeg', sep = '')
 jpeg(paste(km_fold, fname, sep = '/'), width = 800, height = 800,quality = 100)
 
 # 6 graphs on a 3x2 grid

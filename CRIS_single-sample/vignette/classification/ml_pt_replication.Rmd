@@ -195,8 +195,7 @@ br_lsvm_tuned_testing <- ml_pipeline_test(mldata = mldata,
                                             seed = .SEED,
                                             cv_set = CVSettings$new(),
                                             model = br_lsvm_custom,
-                                            cl_thresholds = br_lsvm_thr_tuned$thresholds,
-                                            png_path = here('br_lsvm_roc_tuned_testing.png'))
+                                            cl_thresholds = br_lsvm_thr_tuned$thresholds)
 print(br_lsvm_tuned_testing$metrics)
 ```
 
@@ -247,8 +246,7 @@ br_lsvm_custom_testing_pdx <- ml_pipeline_test(mldata = mldata_pdx,
                                                seed = .SEED,
                                                cv_set = CVSettings$new(),
                                                model = br_lsvm_custom,
-                                               cl_thresholds = br_lsvm_thr_tuned$thresholds,
-                                               png_path = here('br_lsvm_roc_tuned_testing_pdx.png'))
+                                               cl_thresholds = br_lsvm_thr_tuned$thresholds)
 print(br_lsvm_custom_testing_pdx$metrics)
 
 # Create the annotation object and read the annotations
