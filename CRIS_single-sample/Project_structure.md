@@ -4,16 +4,17 @@ The present file is used to describe the structure of the repository.
 In particular:
 
 1. **additional files** folder: contains additional files indirectly related to the project. In particular, there is an excel forest plot template that can be used to draw forest plots starting from the results obtained by the source code.
-It is sufficient to copy the obtained dataframe in the template file (following its structure) to see how the forest plots update automatically. **NB**: the labels present in the forest plots (representing p-values) must be updated manually.
-2. **scripts** folder: contains scripts that can be run to obtain training/testing/biological validation of all models.
+It is sufficient to copy the obtained dataframe in the template file (following its structure) to see how the forest plots update automatically. **NB**: the labels present in the forest plots (representing p-values) must be updated manually. As a consequence, any considered path is relative to the working directory of the project itself
+2. **CRIS_single-sample.Rproj** file: in RStudio, using File/Open Project and selecting this .Rproj file the project can be open and the working directory is automatically set to the [*CRIS_single-sample*](https://github.com/DEIB-GECO/CRIS_single-sample/tree/main/CRIS_single-sample) directory where the .RProj file is located.
+3.  **scripts** folder: contains scripts that can be run to obtain training/testing/biological validation of all models.
 In particular, the logical order in which they should be executed is:
 	1. *ntp_ml_thresholds.r* : generation of the thresholds for the assignment of multiple classes in NTP.
 	2. *single_label_training.r* and *ml_problem_transformation_training.r*: training of single-label and problem-transformation multi-label classifiers.
 	3. *single_label_thresholds.r*  and *ml_problem_transformation_thresholds.r*: computation of thresholds for assignment of multiple classes starting from scores of single-label and problem-transformation multi-label classifiers.
 	4. *single_label_testing.r*, *ml_algorithm_adaptation_testing.r*  and *ml_problem_transformation_testing.r*: testing of single-label and multi-label classifiers.
 	5. *kaplan_meier.r* and *forest_plots.r*: computation of Kaplan-Meier curves and forest plots for all the main methods.
-3. **src** folder: source code (divided in several subfolders. The *utils* subfolder contains the *paths_db.xlsx* excel file with the paths of all accessible data.
-4. **vignette** folder: contains R notebooks that explain how to use the code. In particular, the logical order in which they should be read is:
+4. **src** folder: source code (divided in several subfolders. The *utils* subfolder contains the *paths_db.xlsx* excel file with the paths of all accessible data.
+5. **vignette** folder: contains R notebooks that explain how to use the code. In particular, the logical order in which they should be read is:
 	1. *data_management/load_datasets.rmd* and *data_management/load_references.rmd*: vignettes that explain how to read the datasets and the references (e.g. NTP reference classifcation).
 	2. *data_management/filter_expression.rmd*: vignette explaining how to filter the datasets by samples/genes.
 	3. *data_management/data_pipelines.rmd*: vignette explaining the classes used to manage the data and the functions to load the data ready for training/testing of all classifiers (both for PDX and TCGA)
