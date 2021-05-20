@@ -14,10 +14,11 @@ source(here('src','pipelines','source_pipelines.r'))
 # Configuration constants -------------------------------------------------
 
 # Paths for single-label models
-.model_file <- path_loader$get_classifier_file_path('sl', .FS_TYPE, .TUNE, path_type = 'models')
-
+# .model_file <- path_loader$get_classifier_file_path('sl', .FS_TYPE, .TUNE, path_type = 'models')
+.model_file  <- path_loader$get_path('NTP_ONLY_SL_MODELS')
 # File where the thresholds are saved
-.thresholds_file <- path_loader$get_classifier_file_path('sl', .FS_TYPE, .TUNE, path_type = 'thresholds')
+# .thresholds_file <- path_loader$get_classifier_file_path('sl', .FS_TYPE, .TUNE, path_type = 'thresholds')
+.thresholds_file    <- path_loader$get_path('NTP_ONLY_ML_AA_THR')
 
 # Classifier settings -----------------------------------------------------
 

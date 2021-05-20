@@ -214,8 +214,11 @@ sl_pipeline_test <- function(sldata, method, seed, model, cl_thresholds = NULL, 
       stop('Missing max and min values for normalization into 0-1')
 
     # Multi label algorithm adaptation requires
-    pred <- ohenery::inv_smax(as.matrix(sl_pred[,CRIS_CLASSES]))
-
+    pred <- as.matrix(sl_pred[,CRIS_CLASSES])
+    for (i in 1:nrow(sl_pred)){
+      pred[i, CRIS_CLASSES] <- ohenery::inv_smax(as.matrix(sl_pred[i,CRIS_CLASSES]))
+    }
+      
     # Move into range [0,1], removing Infinite values
     for (c in CRIS_CLASSES){
       min_not_inf <- min_cls[c]
@@ -287,7 +290,9 @@ sl_pipeline_thresholds <- function(sldata, method, seed, model, png_path, mldata
   # }else{
 
   pred <- slc$classify(model, sldata$train_)
-  pred <- ohenery::inv_smax(as.matrix(pred[,CRIS_CLASSES]))
+  for (i in 1:nrow(pred)){
+    pred[i, CRIS_CLASSES] <- ohenery::inv_smax(as.matrix(pred[i,CRIS_CLASSES]))
+  }
   for (c in CRIS_CLASSES){
     min_cls[c] <- min(pred[!is.infinite(pred[,c]), c], na.rm = TRUE)
     max_cls[c] <- max(pred[!is.infinite(pred[,c]), c], na.rm = TRUE)

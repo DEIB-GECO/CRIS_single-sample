@@ -189,7 +189,10 @@ SLClassifier <- R6Class(
       pred <- self$classify(model, data)
       
       # Remove the softmax layer
-      pred <- ohenery::inv_smax(as.matrix(pred[,CRIS_CLASSES]))
+      for (i in 1:nrow(pred)){
+        pred[i, CRIS_CLASSES] <- ohenery::inv_smax(as.matrix(pred[i,CRIS_CLASSES]))
+      }
+      
       
       # Move into range [0,1], removing Infinite values
       for (c in CRIS_CLASSES){
