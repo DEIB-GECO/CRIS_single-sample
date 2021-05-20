@@ -27,11 +27,11 @@ The installation required is summarized in the next steps:
 
   > <code>	install.packages("path_to_utiml.tar.gz") </code>
 
-9. Install all the other required libraries by running the script in the src folder of the project:
+9. Install all the other required libraries by running the script in the *src* folder of the project:
 
   > <code>	source("src/install_libraries.r") </code>
   
-10. Load the required libraries by running the script in the src folder of the project:
+10. Load the required libraries by running the script in the *src* folder of the project:
 
   > <code>    source("src/load_libraries.r") </code>
 
