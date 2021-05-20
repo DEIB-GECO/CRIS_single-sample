@@ -19,11 +19,11 @@ The installation required is summarized in the next steps:
 
 6. Download the zip file of the repository; in RStudio, open the project with File > Open project and open the **CRIS_single-sample.Rproj** file located in the folder [*CRIS_single-sample*](https://github.com/DEIB-GECO/CRIS_single-sample/tree/main/CRIS_single-sample).
 
-7. To install the original CRIS classifier, download the tar.gz file of the library (here provided in [CRISclassifier](https://github.com/DEIB-GECO/CRIS_single-sample/blob/main/CRISclassifier_1.0.0.tar.gz) and then run the command
+7. To install the original CRIS classifier, download the tar.gz file of the library (from [CRISclassifier](https://github.com/DEIB-GECO/CRIS_single-sample/blob/main/CRISclassifier_1.0.0.tar.gz)) and then run the command
 
   > <code>	install.packages("path_to_CRIS-classifier.tar.gz") </code>
   
-8. To install the *utiml* package, download the tar.gz file of the library (from [utiml](https://cran.r-project.org/src/contrib/Archive/utiml/utiml_0.1.6.tar.gz) and then run the command
+8. To install the *utiml* package, download the tar.gz file of the library (from [utiml](https://cran.r-project.org/src/contrib/Archive/utiml/utiml_0.1.6.tar.gz)) and then run the command
 
   > <code>	install.packages("path_to_utiml.tar.gz") </code>
 
