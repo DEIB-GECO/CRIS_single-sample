@@ -35,7 +35,7 @@ The installation required is summarized in the next steps:
 
   > <code>    source("src/load_libraries.r") </code>
 
-11. Install any further dependecies if required 
+11. Install any further dependecies if required by the installation of the libraries in 'install_libraries.r'.
 
 12. Download the **data.zip** file from **XX**, containing all the needed data and extract it as it within the project folder [*CRIS_single-sample*](https://github.com/DEIB-GECO/CRIS_single-sample/tree/main/CRIS_single-sample). Notice that such data are required to run all the available scripts and vignettes. 
 
