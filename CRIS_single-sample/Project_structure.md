@@ -25,3 +25,8 @@ In particular, the logical order in which they should be executed is:
 	8. *classification/ml_pt_replication.rmd*: vignette explanining how to apply multi-label problem transformation classifiers on the datasets (training, 		 threshold computation for multi-label assignment, testing and biological validation).
 
 **NB**: the execution of the R notebooks requires the **data** .zip file, which must be downloaded separately from *XX* and extracted at the same level of *src*, *vignette*, *scripts* and *additional files* folders.
+
+# References:
+1. https://adv-r.hadley.nz/r6.html for read-only access of classes.
+2. https://www.youtube.com/watch?v=MnSRNPMZqH4 for how to draw forest plots in excel.
+
