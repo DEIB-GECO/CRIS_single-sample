@@ -1,6 +1,6 @@
 # CRIS_single-sample
 
-The work presented in this repository allows to apply single-sample gene-expression-based classifiers for CRIS stratification of colorectal cancer patients. The work has been organized in the [**CRIS_single-sample**](https://github.com/DEIB-GECO/CRIS_single-sample/tree/main/CRIS_single-sample) Rproject folder, which includes the source code as well as several vignettes showing how to use such code, and different scripts useful to replicate the training, testing and biological validations of all the models under evaluation. Further details about the content of the [**CRIS_single-sample**](https://github.com/DEIB-GECO/CRIS_single-sample/tree/main/CRIS_single-sample) Rproject folder are reported on the [**Project structure.md**](https://github.com/DEIB-GECO/CRIS_single-sample/tree/main/CRIS_single-sample/Project_structure.md) file provided within the same folder, as to be easily accessible also on R environment.
+The work presented in this repository allows to apply single-sample gene-expression-based classifiers for CRIS stratification of colorectal cancer patients. The work has been organized in the [**CRIS_single-sample**](https://github.com/DEIB-GECO/CRIS_single-sample/tree/main/CRIS_single-sample) Rproject folder, which includes the source code, as well as several vignettes showing how to use such code, and different scripts useful to replicate the training, testing and biological validations of all the models under evaluation. Further details about the content of the [**CRIS_single-sample**](https://github.com/DEIB-GECO/CRIS_single-sample/tree/main/CRIS_single-sample) Rproject folder are reported on the [**Project structure.md**](https://github.com/DEIB-GECO/CRIS_single-sample/tree/main/CRIS_single-sample/Project_structure.md) file provided within the same folder, as to be easily accessible also on R environment.
 
 In order to use the functionalities provided by the here provided source code, some preliminary steps must be executed. Furthermore, we recall that, since we have based the research inside an R project, any considered path is relative to the working directory of the project itself. 
 
@@ -35,7 +35,7 @@ The installation required is summarized in the next steps:
 
   > <code>    source("src/load_libraries.r") </code>
 
-11. Install any further dependecies if required 
+11. Install any further dependecies if required by the installation of the libraries in 'install_libraries.r'.
 
 12. Download the **data.zip** file from **XX**, containing all the needed data and extract it as it within the project folder [*CRIS_single-sample*](https://github.com/DEIB-GECO/CRIS_single-sample/tree/main/CRIS_single-sample). Notice that such data are required to run all the available scripts and vignettes. 
 
