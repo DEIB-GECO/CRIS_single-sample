@@ -13,8 +13,6 @@ source(here('src', 'utils', 'source_utils.r'))
 
 # Datasets ----------------------------------------------------------------
 
-
-# TODO: reference to Isella et. al.
 #' Load the original TCGA dataset aligned to HG19 in the global environment
 load_candiolo_hg19 <- function(){
   
@@ -393,7 +391,7 @@ load_features_grch38 <- function(dataset = 'tcga'){
 }
 
 
-# TODO: CHECK
+
 load_prepared_tcga_data <-
   function(confident,
            uniformed,
@@ -425,7 +423,7 @@ load_prepared_tcga_data <-
 
 }
 
-# TODO: CHECK
+
 load_prepared_pdx_data <- function(confident, uniformed, fs_type, type = 'sl', samples_filter = NULL){
   
   # Loading data

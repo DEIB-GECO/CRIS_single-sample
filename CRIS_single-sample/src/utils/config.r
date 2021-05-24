@@ -17,7 +17,6 @@
 .DEF_OUTPUT    <- here('output/replication')
 dir_create(.DEF_OUTPUT)
 
-
 # Configuration for global scripts ----------------------------------------
 
 # Either all/conf/non_conf

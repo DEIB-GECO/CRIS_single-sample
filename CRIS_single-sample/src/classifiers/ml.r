@@ -15,6 +15,7 @@ MLClassifier <- R6Class(
   private = list(
     .cv_set = NULL,
     
+    # https://journal.r-project.org/archive/2018/RJ-2018-041/RJ-2018-041.pdf
     .exec_cv    = function(data, alg_settings, tune_vals){
 
       set.seed(private$.seed)

@@ -1,7 +1,7 @@
 # Description -------------------------------------------------------------
 
 # Class for the execution of single-label classifiers.
-
+# https://cran.r-project.org/web/packages/caret/vignettes/caret.html
 # Class definition --------------------------------------------------------
 
 SLClassifier <- R6Class(

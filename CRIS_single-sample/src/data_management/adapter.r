@@ -314,60 +314,6 @@ adapt_pdx <- function(expr_matrix){
 
 
 
-#' Remove duplicated genes from the given expression matrix
-#' 
-#' @param original_data  The data to be filtered
-#' @return The original data without the genes that appeared more than once
-.remove_duplicated_genes <- function(original_data){
-  
-  print_info("Removing duplicated genes...")
-  # Check path is for a valid gct file
-  if (is.null(original_data)){
-    stop("Provide non-null data")
-    return(data.frame())
-  }
-  
-  # Derive the list of gene names (unique) and, for each gene, check if
-  # it appears in more than one row. If so, take only the row that is associated
-  # to the highest average expression, across the samples.
-  gene_names <- factor(rownames(original_data), levels = unique(rownames(original_data)))
-  selector   <- vector("logical", length(gene_names))
-  for (gene in levels(gene_names)) {
-    gene_rows <- which(gene_names == gene)
-    
-    if (length(gene_rows) > 1){
-      # Remove all rows (except one, whose position must be computed)
-      selector[gene_rows] <- FALSE
-      
-      # Compute average expression in each row that is associated to the gene                
-      avg_expression <- vector("numeric", length(gene_rows))
-      for (i in seq(length(gene_rows))) {
-        avg_expression[i] <- sum(original_data[gene_rows[i], ])/ncol(original_data)
-      }
-      
-      # Select the index of the row associated to the highest average.
-      row_highest_avg <- gene_rows[which(avg_expression == max(avg_expression))]
-      
-      # If more than one is possible, take the first one.
-      row_to_keep <- row_highest_avg[1]
-      selector[row_to_keep] <- TRUE
-      
-    }else{
-      selector[gene_rows] <- TRUE
-    }
-  }
-  
-  filtered_data <- subset(original_data, selector)
-  
-  # Set row and column names (removing dots)
-  colnames(filtered_data) <- gsub(".", "-", colnames(filtered_data), fixed = TRUE)
-  rownames(filtered_data) <- rownames(original_data[selector,])
-  
-  return(filtered_data)
-  
-  
-}
-
 
 
 

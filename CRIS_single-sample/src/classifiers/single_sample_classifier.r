@@ -345,7 +345,7 @@ SingleSampleClassifier <- R6Class(
           pred_binary[pred_binary[,cl] >= thr, cl] <- 1
         }
       }
-
+ 
       # Add number of classes assigned at each sample
       n_classes   <- rowSums(pred_binary[,classes])
       pred_binary <- pred_binary %>% cbind(n_classes)

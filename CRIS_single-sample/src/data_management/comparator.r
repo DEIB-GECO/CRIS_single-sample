@@ -124,7 +124,7 @@ Comparator  <- R6Class('Comparator',
         
         
         #' Extracts the samples that differ in two classifications because of the given condition
-        #' 
+        #' (IMPLEMENTED IN SUBCLASSES)
         #' @param compared_ntp_result   The comparison of the result of two ntp classifications
         #' @param condition             The condition to be considered 
         #' @param sensibility           Minimum sensibility (if required)

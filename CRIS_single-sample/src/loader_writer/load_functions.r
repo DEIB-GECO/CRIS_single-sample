@@ -232,6 +232,7 @@ load_file <- function(path, separator = ",", colnames = TRUE, sheet = NULL) {
 #' @param path_xlsx   Path of the file where to save data
 #' @param sheet_names Name of the sheets in which to save the data
 #' 
+#' @references https://stackoverflow.com/questions/27524472/list-of-data-frames-to-individual-excel-worksheets-r
 #' @return None
 save_data_list <- function(data_list, path_xlsx, sheet_names){
 

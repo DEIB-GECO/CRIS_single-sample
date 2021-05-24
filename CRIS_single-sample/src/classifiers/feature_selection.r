@@ -197,6 +197,7 @@ FeatureManager <- R6Class(
       return(filt_expr)
     },
     
+    # https://www.datacamp.com/community/tutorials/tutorial-ridge-lasso-elastic-net
     apply_lasso = function(data, ref){
     
       print_info('Prepare data')

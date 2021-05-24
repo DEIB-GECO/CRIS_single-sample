@@ -282,6 +282,7 @@ BiologicalPlots <- R6Class(
     },
     
     #' @references issue: https://github.com/kassambara/survminer/issues/443
+    #' @references computation: https://www.datacamp.com/community/tutorials/survival-analysis-R#third
     compute_kaplan_meier = function(cl_ref, group, cl){
       
       # Check group input
@@ -409,7 +410,7 @@ BiologicalPlots <- R6Class(
             samples     <- sum(stats[[class]][[test_type]][[c]]$table[c, ])
             p.value     <- test_data$p.value       %>% signif(digits = 3)
             eff.size    <- test_data$eff.size      %>% round(digits = 3)
-            odds.ratio  <- test_data$odds.ratio  %>% round(digits = 3)
+            odds.ratio  <- test_data$odds.ratio    %>% round(digits = 3)
             conflow     <- test_data$conf.int.low  %>% round(digits = 3)
             confhigh    <- test_data$conf.int.high %>% round(digits = 3)
             test_values <- c(samples, p.value, eff.size, odds.ratio, conflow, confhigh)
