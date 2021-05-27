@@ -26,7 +26,7 @@ dir_create(.DEF_OUTPUT)
 .FS_TYPE <- c('ntp_only') 
 
 # Either tcga or pdx
-.DATA  <- 'tcga'
+.DATA  <- 'pdx'
 
 # Decide if tuning or not
 .TUNE  <- TRUE
@@ -34,14 +34,14 @@ dir_create(.DEF_OUTPUT)
 # PDX and TCGA have the same genes with same aliases
 .UNIFORMED  <- TRUE
 
-# Replication seed
+# Replication seed (598)
 .SEED       <- 598
 
-# Flag to decide if saving the results on file system or not
+# Flag to decide if saving the results In the OUTPUT folder of the file system or not 
 .SAVE <- TRUE
 
-# Flab to decide if using published models (TRUE) or generated models (FALSE)
-.PUBLISHED_MODELS <- TRUE
+# Flag to decide if testing using published models (TRUE) or generated models (FALSE)
+.PUBLISHED_MODELS <- FALSE
 
 
 # Configuration for the forest plots and the kaplan meier -------------------------------

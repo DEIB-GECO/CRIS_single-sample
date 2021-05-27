@@ -2,8 +2,8 @@ library(here)
 library(tidyverse)
 
 # Read the comparison file
-path <- here("additional files/Compare_ntp_only.xlsx")
-ref  <- readxl::read_excel(path, sheet = 2)
+path <- here("additional files/Compare_ntp_only_wo_RBFSVM.xlsx")
+ref  <- readxl::read_excel(path, sheet = 3) #to select sl, sl as ml or ml pt
 
 # Save and then remove row with data labels (TCGA/PDX)
 data_labels <- ref[1,]

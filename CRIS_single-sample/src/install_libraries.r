@@ -20,8 +20,8 @@ libraries <- c("caret",              # single-label classification
                "stringr",            # string utilities (string length, substring etc.)
                "tidyverse",          # handle data.frames (filter, group, etc.)
                #"RColorBrewer",       # color palette for plots
-               "readxl",             # read excel files
-               "utiml"               # apply multi-label classification TODO: check since it is not on CRAN anymore
+               "readxl"#,             # read excel files
+               #"utiml"               # apply multi-label classification TODO: check since it is not on CRAN anymore
               )
   
 

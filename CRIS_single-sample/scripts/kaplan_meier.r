@@ -16,6 +16,8 @@ annot_tcga <- load_file(path_loader$get_path('GMQL_GRCH38_ANNOT'))
 # Objects that allows to draw kaplan meier
 biopl_tcga <- BiologicalPlots$new(annotations = annot_tcga, xlim = .XLIM)
 
+.DATA <- 'tcga'
+
 # Data reading ----------------------------------------------------------------
 sldata <- load_prepared_tcga_data(confident = 'conf',
                                    uniformed = TRUE,
@@ -108,7 +110,7 @@ fname <- paste('kaplan_meier', .XLIM, '.jpeg', sep = '')
 jpeg(paste(km_fold, fname, sep = '/'), width = 800, height = 800,quality = 100)
 
 # 6 graphs on a 3x2 grid
-par(mfrow=c(3,3))
+par(mfrow=c(3,2))
 
 # Margins of the plots
 par(mar=c(5.1, 4.1, 4.1, 2.1))
@@ -125,6 +127,6 @@ biopl_tcga$show_km_plot(km_ml_primary$svmLinear2, alg_name = 'd) LSVM multi-labe
 biopl_tcga$show_km_plot(km_ntp_ml, alg_name = 'e) NTP multi-label - all')
 biopl_tcga$show_km_plot(km_ml_ref$svmLinear2, alg_name = 'f) LSVM multi-label - all')
 
-biopl_tcga$show_km_plot(km_ml_ref$ecc_lsvm, alg_name = 'g) ecc_lsvm multi-label - all')
-biopl_tcga$show_km_plot(km_ml_primary$ecc_lsvm, alg_name = 'h) ecc_lsvm multi-label - primary')
+#biopl_tcga$show_km_plot(km_ml_ref$ecc_lsvm, alg_name = 'g) ecc_lsvm multi-label - all')
+#biopl_tcga$show_km_plot(km_ml_primary$ecc_lsvm, alg_name = 'h) ecc_lsvm multi-label - primary')
 dev.off()

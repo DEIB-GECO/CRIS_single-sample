@@ -4,6 +4,7 @@
 
 # Dependencies ------------------------------------------------------------
 
+library(here)
 source(here('src','load_libraries.r'))
 source(here('src','utils','source_utils.r'))
 source(here('src','loader_writer','load_data.r'))
@@ -18,9 +19,6 @@ source(here('src','pipelines','source_pipelines.r'))
 
 # Path for saving a file with settings used in the training of the models
 .settings_file    <- path_loader$get_classifier_file_path('ml', .FS_TYPE, .TUNE, path_type = 'train_settings')
-
-# Flag to decide if saving the results on file system or not
-.SAVE <- TRUE
 
 # Classifier settings -----------------------------------------------------
 
@@ -38,7 +36,7 @@ mldata <- load_prepared_tcga_data(confident = .CONFIDENT_ONLY,
 # Hold the result of the training pipeline
 train_res <- list()
 
-for (m in names(settings)[1]){
+for (m in names(settings)){
     
   print_debug(m)
   

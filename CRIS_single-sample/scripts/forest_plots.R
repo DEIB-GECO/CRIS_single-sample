@@ -160,7 +160,7 @@ ml_forest_plots <- ml_forest_plots %>%
 # openxlsx::write.xlsx(ntp_ml_forest_plots[which(ntp_ml_forest_plots$Y %% 2 == 0), ], here('ntp_ml_all_forest_plots.xlsx'))
 # openxlsx::write.xlsx(ml_forest_plots[which(ml_forest_plots$Y %% 2 == 0), ], here('ml_aa_all_forest_plots.xlsx'))
 # openxlsx::write.xlsx(ml_forest_plots[which(ml_forest_plots$Y %% 2 != 0), ], here('ml_aa_primary_forest_plots.xlsx'))
-
+# 
 
 
 

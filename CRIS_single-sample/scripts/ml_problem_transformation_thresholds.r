@@ -59,7 +59,7 @@ for (m in intersect(names(settings), names(models))){
   
   # Save a time flag to specify last time thresholds have been updated
   threshold_res[['last_update']] <- Sys.time()
-  
+  threshold_res[['models_last_update']] <- models[['last_update']]
   
   
   # If requested, save the models and the settings

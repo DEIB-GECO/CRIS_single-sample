@@ -19,8 +19,6 @@ source(here('src','pipelines','source_pipelines.r'))
 # Path for saving a file with settings used in the training of the models
 .settings_file    <- path_loader$get_classifier_file_path('sl', .FS_TYPE, .TUNE, path_type = 'train_settings')
 
-# Flag to decide if saving the results on file system or not
-.SAVE <- FALSE
 
 # Classifier settings -----------------------------------------------------
 
