@@ -64,7 +64,7 @@ load_features_grch38(dataset = 'tcga')
 ntp_res <- ntp_pipeline(crisdata = ntp_data,
                         features = features_grch38,
                         repl_id = 'replication_all',         # name to distinguish different replications
-                        n_resempl = 100)
+                        n_resempl = 100000)
 
 ```
 

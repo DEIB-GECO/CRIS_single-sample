@@ -1,4 +1,5 @@
 library(survival)
+library(survminer)
 library(R6)
 
 BiologicalPlots <- R6Class(
@@ -315,7 +316,8 @@ BiologicalPlots <- R6Class(
           column_to_rownames(ALIQUOT_LABEL) 
       
       # Fit the survival curve
-      req_fit <- survfit(f_req_fit, data = cl_ref)
+      req_fit <- survminer::surv_fit(f_req_fit, data = cl_ref)
+      print('ecco')
       
       # Compute COX model and extract p-value of log rank test
       req_cox <- tryCatch(coxph(f_req_fit, data = cl_ref), error = function(e){
@@ -356,6 +358,80 @@ BiologicalPlots <- R6Class(
       
     },
     
+    compute_kaplan_meier_additional = function(cl_ref, group, cl){
+      
+      # Check group input
+      # if (!check_type(group, 'character',1,1) |
+      #     !group %in% c('ref','is_primary'))
+      #   stop('use a single group among ref and is_primary')
+      
+      # Formula for the Kaplan-meier
+      f_req_fit <- as.formula(paste('Surv(df_time, df_status) ~', group))
+      
+      # Get samples that belong to the current group and that do not belong to the class only.
+      cl_ref <- cl_ref[cl_ref[,group] | cl_ref[,'is_other'], ]  
+      
+      # In case of empty data, exit
+      if (nrow(cl_ref) < 1){
+        warning(paste('BiologicalPlots: empty data for kaplan meier -', group, ', ', cl))
+        return(list(
+          data = cl_ref,
+          group = group,
+          fit  = NA,
+          cox  = NA,
+          plot_data = NA
+        ))
+      }
+      
+      
+      # If everything is ok, use the aliquot ID to set the rownames
+      rownames(cl_ref) <- NULL  
+      cl_ref <- cl_ref %>% 
+        column_to_rownames(ALIQUOT_LABEL) 
+      
+      # Fit the survival curve
+      req_fit <- survminer::surv_fit(f_req_fit, data = cl_ref)
+      print('ecco2')
+      # Compute COX model and extract p-value of log rank test
+      req_cox <- tryCatch(coxph(f_req_fit, data = cl_ref), error = function(e){
+        stop(paste('BiologicalPlots: error in cox model for kaplan meier -', group, ', ', cl))
+      })
+      
+      pvalue  <- summary(req_cox)$sctest['pvalue']
+      
+      # Define the plot data 
+      
+      # Classes for the plot legend
+      if (group == 'is_secondary')
+        classes <- c(paste('not', cl), paste(cl, 'secondary'))
+      else
+        classes <- c(paste('not', cl), paste('other than', cl))
+      
+      # Title of the plot
+      plot_title_pvalue <- paste('(p-value = ', signif(pvalue,3), ')',sep = '')
+      
+      # Put together all plot data
+      plot_data  <- list(
+        xlim = private$.xlim,
+        ylim = c(0,1),
+        xlab = 'disease free months',
+        ylab = 'disease free probability',
+        classes = classes,
+        title = plot_title_pvalue
+      )
+      
+      # Return result (data, survfit, cox model, plot data)
+      return(list(
+        data = cl_ref,
+        group = group,
+        fit  = req_fit,
+        cox  = req_cox,
+        plot_data = plot_data)
+      )
+      
+    },
+    
+    
     show_km_plot = function(km_res,alg_name){
   
       # Select colour for CRIS-X as the fourth tone in OrRd palette (orange tones)
@@ -377,6 +453,7 @@ BiologicalPlots <- R6Class(
            cex.axis = 1.4                             # expansion of tick labels text
            )
       
+      
       # Add the legend
       legend("bottomleft",                             # legend position
              legend = km_res$plot_data$classes,        # legend names
@@ -388,6 +465,35 @@ BiologicalPlots <- R6Class(
       title(main = paste(alg_name, km_res$plot_data$title), # title text
             cex.main = 1.4)                                 # text size
      
+    },
+    
+    show_km_plot_and_table = function(km_res,alg_name){
+      
+      # Select colour for CRIS-X as the fourth tone in OrRd palette (orange tones)
+      cris_col <- brewer.pal(n=4,name="OrRd")[4]
+      
+      # Select colour for not CRIS-X as the fourth tone in GnBu palette (green tones)
+      not_cris_col <- brewer.pal(n=4,name="GnBu")[4]
+      
+      # Create palette with the two colours
+      cols <- c(not_cris_col,cris_col)
+      
+
+      ggsurvplot(km_res$fit,                                # survfit object
+                 pval = TRUE, conf.int = TRUE,
+                 risk.table = TRUE,                         # Add risk table
+                 risk.table.col = "strata",                 # Change risk table color by groups
+                 linetype = "strata",                       # Change line type by groups
+                 surv.median.line = "hv",                   # Specify median survival
+                 #ncensor.plot = TRUE, 
+                 ggtheme = theme_light(base_size=20),        # Change ggplot2 theme
+                 palette = cols,                             # curve colours
+                 legend.labs = km_res$plot_data$classes,     # change legend labels.
+                 title = alg_name
+                )
+      
+      
+      
     },
     
     

@@ -297,7 +297,13 @@ sl_pipeline_thresholds <- function(sldata, method, seed, model, png_path, mldata
     max_cls[c] <- max(pred[!is.infinite(pred[,c]), c], na.rm = TRUE)
   }
 
-  thresholds <- slc$roc_thresholds(model, sldata, png_path, max_cls = max_cls, min_cls = min_cls)
+  #thresholds <- slc$roc_thresholds(model, sldata, png_path, max_cls = max_cls, min_cls = min_cls)
+  thresholds <- matrix(0, nrow = length(CRIS_CLASSES), ncol = 3)
+  colnames(thresholds) <- c('tpp','fpp','threshold')
+  thresholds[,'threshold']<-c(0.445527491,	0.473388275,	0.55210052,	0.320118328,	0.4795552218)
+  rownames(thresholds) <- CRIS_CLASSES
+  thresholds<-cbind(class = rownames(thresholds), as.data.frame(thresholds))
+  
   # }
 
   print_info('Setting classifier threhsolds...')

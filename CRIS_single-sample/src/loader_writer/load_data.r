@@ -382,6 +382,8 @@ load_features_grch38 <- function(dataset = 'tcga'){
                  'sl'   = sl_data_pipeline(filt_data, filt_ref, confident, train_samples),
                  'cris' = cris_data_pipeline(filt_data, filt_ref, confident, log2_tr = FALSE),
                  'cris_no_ref' = cris_no_ref_data_pipeline(filt_data, log2_tr = FALSE)
+    
+                   
                  )
   
   if (is.null(data))

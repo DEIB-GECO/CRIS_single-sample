@@ -71,6 +71,9 @@ km_ntp_sl <- biopl_tcga$compute_kaplan_meier(km_ntp_sl_ref, group = 'ref',cl = '
 km_ntp_ml <- biopl_tcga$compute_kaplan_meier(km_ntp_ml_ref, group = 'ref',cl = 'CRIS-B')
 km_ntp_ml_primary <- biopl_tcga$compute_kaplan_meier(km_ntp_ml_ref, group = 'is_primary',cl = 'CRIS-B')
 
+km_ntp_ml_secondary <- biopl_tcga$compute_kaplan_meier_additional(km_ntp_ml_ref, group = 'is_secondary',cl = 'CRIS-B')
+
+
 # Single label
 km_sl <- list()
 for (m in names(sl_testing$results)){
@@ -84,12 +87,20 @@ for (m in names(sl_testing$results)){
 # Multi-label algorithm adaptation
 km_ml_ref <- list()
 km_ml_primary <- list()
+
+km_ml_secondary <- list()
+
+
 for (m in names(ml_adapted_testing$results)){
   
   .ml_res <- ml_adapted_testing$results[[m]]$binary_res %>% rownames_to_column(ALIQUOT_LABEL)
   .km_ref <- biopl_tcga$ref_kaplan_meier(.ml_res, type = 'aa_ml', cl = 'CRIS-B')
   km_ml_ref[[m]] <- biopl_tcga$compute_kaplan_meier(.km_ref, group = 'ref', cl = 'CRIS-B')
   km_ml_primary[[m]] <- biopl_tcga$compute_kaplan_meier(.km_ref, group = 'is_primary', cl = 'CRIS-B')
+  
+  km_ml_secondary[[m]] <- biopl_tcga$compute_kaplan_meier_additional(.km_ref, group = 'is_secondary', cl = 'CRIS-B')
+
+  
 }
 
 # Multi-label problem transformation
@@ -102,18 +113,19 @@ for (m in names(ml_pt_testing$results)){
 }
 
 
-# Draw plot ---------------------------------------------------------------
+# Draw plots ---------------------------------------------------------------
 
 km_fold <- paste(path_loader$get_path('OUT_FOLDER_MODELS'), .FS_TYPE, 'kaplan_meier', sep = '/')
 dir_create(km_fold)
-fname <- paste('kaplan_meier', .XLIM, '.jpeg', sep = '')
+
+fname <- paste('ADDITIONAL_kaplan_meier', .XLIM, '.jpeg', sep = '')
 jpeg(paste(km_fold, fname, sep = '/'), width = 800, height = 800,quality = 100)
 
 # 6 graphs on a 3x2 grid
-par(mfrow=c(3,2))
+par(mfrow=c(4,2))
 
-# Margins of the plots
-par(mar=c(5.1, 4.1, 4.1, 2.1))
+# # Margins of the plots
+par(mar=c(4.1, 4.1, 4.1, 2.1))
 
 # First row
 biopl_tcga$show_km_plot(km_ntp_sl, alg_name = 'a) NTP single-label')
@@ -123,10 +135,40 @@ biopl_tcga$show_km_plot(km_sl$svmLinear2, alg_name = 'b) LSVM single-label')
 biopl_tcga$show_km_plot(km_ntp_ml_primary, alg_name = 'c) NTP multi-label - primary')
 biopl_tcga$show_km_plot(km_ml_primary$svmLinear2, alg_name = 'd) LSVM multi-label - primary')
 
+biopl_tcga$show_km_plot(km_ntp_ml_secondary, alg_name = 'e) NTP multi-label - secondary')
+biopl_tcga$show_km_plot(km_ml_secondary$svmLinear2, alg_name = 'f) LSVM multi-label - secondary')
+
+
 # Third row
-biopl_tcga$show_km_plot(km_ntp_ml, alg_name = 'e) NTP multi-label - all')
-biopl_tcga$show_km_plot(km_ml_ref$svmLinear2, alg_name = 'f) LSVM multi-label - all')
+biopl_tcga$show_km_plot(km_ntp_ml, alg_name = 'g) NTP multi-label - all')
+biopl_tcga$show_km_plot(km_ml_ref$svmLinear2, alg_name = 'h) LSVM multi-label - all')
+
 
 #biopl_tcga$show_km_plot(km_ml_ref$ecc_lsvm, alg_name = 'g) ecc_lsvm multi-label - all')
 #biopl_tcga$show_km_plot(km_ml_primary$ecc_lsvm, alg_name = 'h) ecc_lsvm multi-label - primary')
+
+dev.off()
+
+fname <- paste('LSVM single-label', .XLIM, '.jpeg', sep = '')
+jpeg(paste(km_fold, fname, sep = '/'), width = 800, height = 800,quality = 100)
+par(1,1)
+biopl_tcga$show_km_plot_and_table(km_sl$svmLinear2, alg_name = 'a) LSVM single-label')
+dev.off()
+
+fname <- paste('LSVM multi-label primary', .XLIM, '.jpeg', sep = '')
+jpeg(paste(km_fold, fname, sep = '/'), width = 800, height = 800,quality = 100)
+par(1,1)
+biopl_tcga$show_km_plot_and_table(km_ml_primary$svmLinear2, alg_name = 'c) LSVM multi-label - primary')
+dev.off()
+
+fname <- paste('LSVM multi-label secondary', .XLIM, '.jpeg', sep = '')
+jpeg(paste(km_fold, fname, sep = '/'), width = 800, height = 800,quality = 100)
+par(1,1)
+biopl_tcga$show_km_plot_and_table(km_ml_secondary$svmLinear2, alg_name = 'd) LSVM multi-label - secondary')
+dev.off()
+
+fname <- paste('LSVM multi-label all', .XLIM, '.jpeg', sep = '')
+jpeg(paste(km_fold, fname, sep = '/'), width = 800, height = 800,quality = 100)
+par(1,1)
+biopl_tcga$show_km_plot_and_table(km_ml_ref$svmLinear2, alg_name = 'b) LSVM multi-label - all')
 dev.off()

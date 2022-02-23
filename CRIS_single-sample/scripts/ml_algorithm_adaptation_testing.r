@@ -61,8 +61,6 @@ if (.DATA == 'tcga'){
                                     uniformed = .UNIFORMED, 
                                     fs_type   = .FS_TYPE, 
                                     type      = 'ml')
-}else {
-  stop('.DATA flag must be either tcga or pdx')
 }
 
 
